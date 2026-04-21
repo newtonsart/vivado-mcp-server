@@ -1,0 +1,61 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vivado-mcp-server"
+version = "0.1.0"
+description = "MCP server that controls a running Vivado instance via a TCP socket (TCL plugin + Python asyncio)."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+    { name = "Arturo Navarro", email = "artnavarromunoz@gmail.com" }
+]
+keywords = ["mcp", "vivado", "xilinx", "fpga", "tcl", "model-context-protocol"]
+
+dependencies = [
+    "mcp>=1.0",
+    "anyio>=4.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "ruff>=0.5",
+    "mypy>=1.10",
+]
+
+[project.scripts]
+vivado-mcp-server = "server:main"
+
+[project.urls]
+Documentation = "https://github.com/newtonsart/vivado-mcp-server"
+Repository    = "https://github.com/newtonsart/vivado-mcp-server"
+Issues        = "https://github.com/newtonsart/vivado-mcp-server/issues"
+
+# ------------------------------------------------------------------------------
+# Packaging: code lives under `python/`, not `src/`. Flat modules (`server`,
+# `config`) and packages (`vivado`, `tools`) are declared explicitly.
+# ------------------------------------------------------------------------------
+[tool.setuptools]
+package-dir = { "" = "python" }
+# Flat modules (no __init__.py) under python/: server.py and config.py.
+py-modules  = ["server", "config"]
+
+[tool.setuptools.packages.find]
+where = ["python"]
+include = ["vivado*", "tools*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

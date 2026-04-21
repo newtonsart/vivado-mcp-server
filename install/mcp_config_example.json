@@ -1,0 +1,24 @@
+{
+  "_comment": "Snippet for ~/.config/Claude/claude_desktop_config.json on Linux/macOS, or %APPDATA%\\Claude\\claude_desktop_config.json on Windows. Copy the content inside the 'mcpServers' key of your config; do not overwrite the entire file.",
+  "mcpServers": {
+    "vivado": {
+      "command": "python",
+      "args": ["-m", "server"],
+      "cwd": "C:/Users/<USER>/.vivado-mcp/python",
+      "env": {
+        "VMCP_HOST": "127.0.0.1",
+        "VMCP_PORT": "7654",
+        "VMCP_LOGLEVEL": "INFO"
+      }
+    },
+    "vivado_via_uvx": {
+      "_comment": "Alternative if installed as a package via uv / pip install vivado-mcp-server",
+      "command": "uvx",
+      "args": ["vivado-mcp-server"],
+      "env": {
+        "VMCP_HOST": "127.0.0.1",
+        "VMCP_PORT": "7654"
+      }
+    }
+  }
+}
