@@ -71,17 +71,17 @@ From the repo root:
 pip install -e .
 ```
 
-Or without installing the package:
+Or run directly from the repo without installing (requires [uv](https://docs.astral.sh/uv/)):
 
 ```bash
-pip install "mcp>=1.0" anyio
-python python/server.py
+uv run python -m server
 ```
 
 ### 3. Claude Desktop
 
-Add the snippet from `install/mcp_config_example.json` to your `claude_desktop_config.json`. Minimal example:
+Add to your `claude_desktop_config.json`. Two options:
 
+**Option A — installed** (`pip install .` first):
 ```json
 {
   "mcpServers": {
@@ -93,12 +93,25 @@ Add the snippet from `install/mcp_config_example.json` to your `claude_desktop_c
 }
 ```
 
+**Option B — run from repo with uv** (no install needed):
+```json
+{
+  "mcpServers": {
+    "vivado": {
+      "command": "uv",
+      "args": ["run", "--project", "C:/path/to/vivado-mcp-server", "python", "-m", "server"],
+      "env": { "VMCP_HOST": "127.0.0.1", "VMCP_PORT": "7654" }
+    }
+  }
+}
+```
+
 ## Usage
 
 1. Open Vivado (GUI or `vivado -mode tcl`). The TCL console should show:
 
    ```
-   vivado-mcp-server: plugin loaded. Commands: ::vmcp::server::start / ::vmcp::server::stop
+   vivado-mcp-server: plugin loaded. Commands: ::vmcp::server::start / ::vmcp::server::stop / ::vmcp::server::reload
    [vmcp] server listening on 127.0.0.1:7654
    ```
 

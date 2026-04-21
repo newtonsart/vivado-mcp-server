@@ -1,4 +1,4 @@
-"""Entry point for the `vivado-mcp-socket` MCP server.
+"""Entry point for the `vivado-mcp-server` MCP server.
 
 Typical usage:
     python -m server                    # stdio MCP (for Claude Desktop / Codex)
@@ -36,7 +36,7 @@ except ImportError as _exc:  # noqa: F841
     )
     raise
 
-log = logging.getLogger("vivado-mcp-socket.server")
+log = logging.getLogger("vivado-mcp-server.server")
 
 # -----------------------------------------------------------------------------
 # Global state: a single VivadoClient shared by all tools.
@@ -125,7 +125,7 @@ async def reload_plugin(source_dir: str = "") -> str:
     Args:
         source_dir: Optional path to the tcl/ directory to reload from.
                     Defaults to the installed plugin path. Pass the repo path
-                    (e.g. "C:/path/to/vivado-mcp-socket/tcl") during development.
+                    (e.g. "C:/path/to/vivado-mcp-server/tcl") during development.
     """
     client = await get_client()
     params = {}
@@ -159,7 +159,7 @@ def _setup_logging(level: str) -> None:
 
 def _parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
     p = argparse.ArgumentParser(
-        prog="vivado-mcp-socket",
+        prog="vivado-mcp-server",
         description="MCP server bridging to a running Vivado instance via TCP.",
     )
     p.add_argument("--host", default=config.HOST, help="TCP host of the plugin (default: %(default)s)")
@@ -175,7 +175,7 @@ def main(argv: Optional[list[str]] = None) -> None:
     config.HOST = args.host
     config.PORT = args.port
     _setup_logging(args.log_level)
-    log.info("starting vivado-mcp-socket; plugin at %s:%d", config.HOST, config.PORT)
+    log.info("starting vivado-mcp-server; plugin at %s:%d", config.HOST, config.PORT)
     # FastMCP.run() handles stdio initialization and event loop management.
     mcp.run()
 
