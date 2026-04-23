@@ -42,6 +42,37 @@ proc ::vmcp::handlers::reports::_ensure_design_open {prefer} {
 }
 
 # ------------------------------------------------------------------------------
+# Helper: emit a potentially large report. If params has non-empty `path`,
+# write full report to disk and return {path, size_bytes, head}. Otherwise
+# return {report} inline (caller must ensure line fits socket buffer).
+# ------------------------------------------------------------------------------
+proc ::vmcp::handlers::reports::_emit_report {client_id req_id params report} {
+    set path ""
+    if {[dict exists $params path]} { set path [dict get $params path] }
+    if {$path ne ""} {
+        if {[catch {
+            set fh [open $path w]
+            fconfigure $fh -translation lf -encoding utf-8
+            puts -nonewline $fh $report
+            close $fh
+        } err]} {
+            ::vmcp::protocol::send_error $client_id $req_id \
+                "FILE_WRITE" "Could not write report to $path: $err"
+            return
+        }
+        set head [string range $report 0 1999]
+        ::vmcp::protocol::send_result $client_id $req_id \
+            [::vmcp::json::obj [list \
+                path       $path \
+                size_bytes [::vmcp::json::num [string length $report]] \
+                head       $head]]
+    } else {
+        ::vmcp::protocol::send_result $client_id $req_id \
+            [::vmcp::json::obj [list report $report]]
+    }
+}
+
+# ------------------------------------------------------------------------------
 # get_timing_summary
 # params:
 #   run (string, optional, default "impl_1")
@@ -324,16 +355,128 @@ proc ::vmcp::handlers::reports::drc {client_id req_id params} {
             [dict get $opts -errorinfo]
         return
     }
-    ::vmcp::protocol::send_result $client_id $req_id \
-        [::vmcp::json::obj [list report $report]]
+    ::vmcp::handlers::reports::_emit_report $client_id $req_id $params $report
+    return ok
+}
+
+# ------------------------------------------------------------------------------
+# get_power_report — report_power -return_string
+# ------------------------------------------------------------------------------
+proc ::vmcp::handlers::reports::power_report {client_id req_id params} {
+    if {![::vmcp::handlers::reports::_require_project $client_id $req_id]} return
+    if {![::vmcp::handlers::reports::_ensure_design_open "impl"]} {
+        ::vmcp::protocol::send_error $client_id $req_id \
+            "NO_DESIGN" "No design open"
+        return
+    }
+    if {[catch {report_power -return_string} report opts]} {
+        ::vmcp::protocol::send_error $client_id $req_id \
+            "REPORT_FAILED" "report_power failed: $report" \
+            [dict get $opts -errorinfo]
+        return
+    }
+    ::vmcp::handlers::reports::_emit_report $client_id $req_id $params $report
+    return ok
+}
+
+# ------------------------------------------------------------------------------
+# get_cdc_report — report_cdc -return_string
+# ------------------------------------------------------------------------------
+proc ::vmcp::handlers::reports::cdc_report {client_id req_id params} {
+    if {![::vmcp::handlers::reports::_require_project $client_id $req_id]} return
+    if {![::vmcp::handlers::reports::_ensure_design_open "impl"]} {
+        ::vmcp::protocol::send_error $client_id $req_id \
+            "NO_DESIGN" "No design open"
+        return
+    }
+    if {[catch {report_cdc -return_string} report opts]} {
+        ::vmcp::protocol::send_error $client_id $req_id \
+            "REPORT_FAILED" "report_cdc failed: $report" \
+            [dict get $opts -errorinfo]
+        return
+    }
+    ::vmcp::handlers::reports::_emit_report $client_id $req_id $params $report
+    return ok
+}
+
+# ------------------------------------------------------------------------------
+# get_methodology_violations — report_methodology -return_string
+# ------------------------------------------------------------------------------
+proc ::vmcp::handlers::reports::methodology_report {client_id req_id params} {
+    if {![::vmcp::handlers::reports::_require_project $client_id $req_id]} return
+    if {![::vmcp::handlers::reports::_ensure_design_open "impl"]} {
+        ::vmcp::protocol::send_error $client_id $req_id \
+            "NO_DESIGN" "No design open"
+        return
+    }
+    if {[catch {report_methodology -return_string} report opts]} {
+        ::vmcp::protocol::send_error $client_id $req_id \
+            "REPORT_FAILED" "report_methodology failed: $report" \
+            [dict get $opts -errorinfo]
+        return
+    }
+    ::vmcp::handlers::reports::_emit_report $client_id $req_id $params $report
+    return ok
+}
+
+# ------------------------------------------------------------------------------
+# get_io_report — report_io -return_string
+# ------------------------------------------------------------------------------
+proc ::vmcp::handlers::reports::io_report {client_id req_id params} {
+    if {![::vmcp::handlers::reports::_require_project $client_id $req_id]} return
+    if {![::vmcp::handlers::reports::_ensure_design_open "impl"]} {
+        ::vmcp::protocol::send_error $client_id $req_id \
+            "NO_DESIGN" "No design open"
+        return
+    }
+    if {[catch {report_io -return_string} report opts]} {
+        ::vmcp::protocol::send_error $client_id $req_id \
+            "REPORT_FAILED" "report_io failed: $report" \
+            [dict get $opts -errorinfo]
+        return
+    }
+    ::vmcp::handlers::reports::_emit_report $client_id $req_id $params $report
+    return ok
+}
+
+# ------------------------------------------------------------------------------
+# get_fanout_report — report_high_fanout_nets -return_string
+# params:
+#   max_nets (int, optional, default 20)
+#   path     (string, optional) — if set, dump full report to file
+# ------------------------------------------------------------------------------
+proc ::vmcp::handlers::reports::fanout_report {client_id req_id params} {
+    if {![::vmcp::handlers::reports::_require_project $client_id $req_id]} return
+    if {![::vmcp::handlers::reports::_ensure_design_open "impl"]} {
+        ::vmcp::protocol::send_error $client_id $req_id \
+            "NO_DESIGN" "No design open"
+        return
+    }
+    set max_nets 20
+    if {[dict exists $params max_nets]} {
+        set v [dict get $params max_nets]
+        if {[string is integer -strict $v] && $v > 0} { set max_nets $v }
+    }
+    if {[catch {report_high_fanout_nets -max_nets $max_nets -return_string} report opts]} {
+        ::vmcp::protocol::send_error $client_id $req_id \
+            "REPORT_FAILED" "report_high_fanout_nets failed: $report" \
+            [dict get $opts -errorinfo]
+        return
+    }
+    ::vmcp::handlers::reports::_emit_report $client_id $req_id $params $report
     return ok
 }
 
 # ------------------------------------------------------------------------------
 # Registration.
 # ------------------------------------------------------------------------------
-::vmcp::dispatcher::register get_timing_summary ::vmcp::handlers::reports::timing_summary
-::vmcp::dispatcher::register get_timing_paths   ::vmcp::handlers::reports::timing_paths
-::vmcp::dispatcher::register get_utilization    ::vmcp::handlers::reports::utilization
-::vmcp::dispatcher::register get_messages       ::vmcp::handlers::reports::messages
-::vmcp::dispatcher::register get_drc            ::vmcp::handlers::reports::drc
+::vmcp::dispatcher::register get_timing_summary       ::vmcp::handlers::reports::timing_summary
+::vmcp::dispatcher::register get_timing_paths         ::vmcp::handlers::reports::timing_paths
+::vmcp::dispatcher::register get_utilization          ::vmcp::handlers::reports::utilization
+::vmcp::dispatcher::register get_messages             ::vmcp::handlers::reports::messages
+::vmcp::dispatcher::register get_drc                  ::vmcp::handlers::reports::drc
+::vmcp::dispatcher::register get_power_report         ::vmcp::handlers::reports::power_report
+::vmcp::dispatcher::register get_cdc_report           ::vmcp::handlers::reports::cdc_report
+::vmcp::dispatcher::register get_methodology_violations ::vmcp::handlers::reports::methodology_report
+::vmcp::dispatcher::register get_io_report            ::vmcp::handlers::reports::io_report
+::vmcp::dispatcher::register get_fanout_report        ::vmcp::handlers::reports::fanout_report

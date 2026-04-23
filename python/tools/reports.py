@@ -102,15 +102,116 @@ def register(mcp, client_factory) -> None:
         return "\n".join(lines)
 
     @mcp.tool()
-    async def get_drc() -> str:
-        """Run report_drc on the open design and return the report."""
+    async def get_drc(path: str = "") -> str:
+        """Run report_drc on the open design.
+
+        Args:
+            path: optional absolute file path. If given, the full report is
+                  written to disk and a short metadata summary is returned
+                  (use to avoid socket buffer limits on large reports).
+        """
         client = await client_factory()
         data = await client.send_command(
             "get_drc",
-            {},
+            {"path": path},
             timeout=config.timeout_for("get_drc"),
         )
-        return data.get("report", "(empty DRC report)")
+        return _format_report(data, "DRC")
+
+    @mcp.tool()
+    async def get_power_report(path: str = "") -> str:
+        """Run report_power on the implemented design.
+
+        Requires an implemented design (impl_1 complete).
+
+        Args:
+            path: optional absolute file path; see get_drc.
+        """
+        client = await client_factory()
+        data = await client.send_command(
+            "get_power_report",
+            {"path": path},
+            timeout=config.timeout_for("get_power_report"),
+        )
+        return _format_report(data, "power")
+
+    @mcp.tool()
+    async def get_cdc_report(path: str = "") -> str:
+        """Run report_cdc and return the clock domain crossing report.
+
+        Highlights unsafe CDCs, synchronizers, and missing constraints.
+
+        Args:
+            path: optional absolute file path; see get_drc.
+        """
+        client = await client_factory()
+        data = await client.send_command(
+            "get_cdc_report",
+            {"path": path},
+            timeout=config.timeout_for("get_cdc_report"),
+        )
+        return _format_report(data, "CDC")
+
+    @mcp.tool()
+    async def get_methodology_violations(path: str = "") -> str:
+        """Run report_methodology and return design methodology violations.
+
+        Covers TIMING, CDC, RESET, and other Xilinx methodology checks.
+
+        Args:
+            path: optional absolute file path; see get_drc. Recommended —
+                  methodology reports are often > 64 KB.
+        """
+        client = await client_factory()
+        data = await client.send_command(
+            "get_methodology_violations",
+            {"path": path},
+            timeout=config.timeout_for("get_methodology_violations"),
+        )
+        return _format_report(data, "methodology")
+
+    @mcp.tool()
+    async def get_fanout_report(max_nets: int = 20, path: str = "") -> str:
+        """Run report_high_fanout_nets on the open design.
+
+        Args:
+            max_nets: number of top fanout nets to include.
+            path: optional absolute file path; see get_drc.
+        """
+        client = await client_factory()
+        data = await client.send_command(
+            "get_fanout_report",
+            {"max_nets": max_nets, "path": path},
+            timeout=config.timeout_for("get_fanout_report"),
+        )
+        return _format_report(data, "fanout")
+
+    @mcp.tool()
+    async def get_io_report(path: str = "") -> str:
+        """Run report_io (I/O pin assignments, standards, directions).
+
+        Args:
+            path: optional absolute file path; see get_drc. Recommended —
+                  I/O reports are often > 200 KB.
+        """
+        client = await client_factory()
+        data = await client.send_command(
+            "get_io_report",
+            {"path": path},
+            timeout=config.timeout_for("get_io_report"),
+        )
+        return _format_report(data, "I/O")
+
+
+def _format_report(data: Dict[str, Any], name: str) -> str:
+    if "path" in data:
+        size = data.get("size_bytes", 0)
+        head = data.get("head", "")
+        return (
+            f"{name} report written to {data['path']} ({size} bytes).\n"
+            f"--- head ---\n{head}"
+        )
+    return data.get("report", f"(empty {name} report)")
 
 
 def _format_timing_summary(data: Dict[str, Any]) -> str:

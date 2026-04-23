@@ -136,8 +136,159 @@ proc ::vmcp::handlers::project::_gather_info {} {
 }
 
 # ------------------------------------------------------------------------------
+# write_checkpoint
+# params:
+#   path (string, required) — destination .dcp file path
+# ------------------------------------------------------------------------------
+proc ::vmcp::handlers::project::write_checkpoint {client_id req_id params} {
+    if {[catch {current_project} cp]} {
+        ::vmcp::protocol::send_error $client_id $req_id \
+            "NO_PROJECT" "No open project"
+        return
+    }
+    if {![dict exists $params path]} {
+        ::vmcp::protocol::send_error $client_id $req_id \
+            "INVALID_PARAMS" "Missing 'path' parameter"
+        return
+    }
+    set path [dict get $params path]
+
+    if {[catch {::write_checkpoint -force $path} err opts]} {
+        ::vmcp::protocol::send_error $client_id $req_id \
+            "VIVADO_ERROR" "write_checkpoint failed: $err" \
+            [dict get $opts -errorinfo]
+        return
+    }
+    ::vmcp::protocol::send_result $client_id $req_id \
+        [::vmcp::json::obj [list path $path written [::vmcp::json::bool 1]]]
+    return ok
+}
+
+# ------------------------------------------------------------------------------
+# write_xdc
+# params:
+#   path            (string, required) — destination .xdc path
+#   constraints_only (bool, optional)  — if true, use -constraints
+# ------------------------------------------------------------------------------
+proc ::vmcp::handlers::project::write_xdc {client_id req_id params} {
+    if {[catch {current_project} cp]} {
+        ::vmcp::protocol::send_error $client_id $req_id \
+            "NO_PROJECT" "No open project"
+        return
+    }
+    if {![dict exists $params path]} {
+        ::vmcp::protocol::send_error $client_id $req_id \
+            "INVALID_PARAMS" "Missing 'path' parameter"
+        return
+    }
+    set path [dict get $params path]
+    set cmd [list write_xdc -force]
+    if {[dict exists $params constraints_only] && \
+        [string is true -strict [dict get $params constraints_only]]} {
+        lappend cmd -constraints ONLY
+    }
+    lappend cmd $path
+    if {[catch {eval $cmd} err opts]} {
+        ::vmcp::protocol::send_error $client_id $req_id \
+            "VIVADO_ERROR" "write_xdc failed: $err" \
+            [dict get $opts -errorinfo]
+        return
+    }
+    set size 0
+    catch { set size [file size $path] }
+    ::vmcp::protocol::send_result $client_id $req_id \
+        [::vmcp::json::obj [list \
+            path       $path \
+            size_bytes [::vmcp::json::num $size] \
+            written    [::vmcp::json::bool 1]]]
+    return ok
+}
+
+# ------------------------------------------------------------------------------
+# read_xdc — add an XDC constraint file to the active constraints fileset.
+# params:
+#   path    (string, required) — path to the .xdc file
+#   fileset (string, optional) — target constraint fileset (default current)
+# ------------------------------------------------------------------------------
+proc ::vmcp::handlers::project::read_xdc {client_id req_id params} {
+    if {[catch {current_project} cp]} {
+        ::vmcp::protocol::send_error $client_id $req_id \
+            "NO_PROJECT" "No open project"
+        return
+    }
+    if {![dict exists $params path]} {
+        ::vmcp::protocol::send_error $client_id $req_id \
+            "INVALID_PARAMS" "Missing 'path' parameter"
+        return
+    }
+    set path [dict get $params path]
+    if {![file exists $path]} {
+        ::vmcp::protocol::send_error $client_id $req_id \
+            "FILE_NOT_FOUND" "XDC file not found: $path"
+        return
+    }
+    set fs ""
+    if {[dict exists $params fileset]} { set fs [dict get $params fileset] }
+    if {$fs eq ""} {
+        if {[catch {current_fileset -constrset} fs]} { set fs "constrs_1" }
+    }
+    if {[catch {add_files -fileset $fs -norecurse $path} added opts]} {
+        ::vmcp::protocol::send_error $client_id $req_id \
+            "VIVADO_ERROR" "read_xdc/add_files failed: $added" \
+            [dict get $opts -errorinfo]
+        return
+    }
+    ::vmcp::protocol::send_result $client_id $req_id \
+        [::vmcp::json::obj [list \
+            path     $path \
+            fileset  $fs \
+            added    [::vmcp::json::bool 1]]]
+    return ok
+}
+
+# ------------------------------------------------------------------------------
+# set_top — set the top module of the active source fileset.
+# params:
+#   top     (string, required) — top module name
+#   fileset (string, optional) — source fileset (default current_fileset)
+# ------------------------------------------------------------------------------
+proc ::vmcp::handlers::project::set_top {client_id req_id params} {
+    if {[catch {current_project} cp]} {
+        ::vmcp::protocol::send_error $client_id $req_id \
+            "NO_PROJECT" "No open project"
+        return
+    }
+    if {![dict exists $params top]} {
+        ::vmcp::protocol::send_error $client_id $req_id \
+            "INVALID_PARAMS" "Missing 'top' parameter"
+        return
+    }
+    set top [dict get $params top]
+    set fs ""
+    if {[dict exists $params fileset]} { set fs [dict get $params fileset] }
+    if {$fs eq ""} {
+        if {[catch {current_fileset} fs]} { set fs "sources_1" }
+    }
+    if {[catch {set_property top $top [get_filesets $fs]} err opts]} {
+        ::vmcp::protocol::send_error $client_id $req_id \
+            "VIVADO_ERROR" "set_top failed: $err" \
+            [dict get $opts -errorinfo]
+        return
+    }
+    ::vmcp::protocol::send_result $client_id $req_id \
+        [::vmcp::json::obj [list \
+            top     $top \
+            fileset $fs]]
+    return ok
+}
+
+# ------------------------------------------------------------------------------
 # Register with the dispatcher.
 # ------------------------------------------------------------------------------
 ::vmcp::dispatcher::register open_project       ::vmcp::handlers::project::open
 ::vmcp::dispatcher::register close_project      ::vmcp::handlers::project::close
 ::vmcp::dispatcher::register get_project_info   ::vmcp::handlers::project::info
+::vmcp::dispatcher::register write_checkpoint   ::vmcp::handlers::project::write_checkpoint
+::vmcp::dispatcher::register write_xdc          ::vmcp::handlers::project::write_xdc
+::vmcp::dispatcher::register read_xdc           ::vmcp::handlers::project::read_xdc
+::vmcp::dispatcher::register set_top            ::vmcp::handlers::project::set_top

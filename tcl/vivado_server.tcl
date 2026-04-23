@@ -53,7 +53,10 @@ proc ::vmcp::server::_source_all {} {
         [file join $dir handlers synthesis.tcl] \
         [file join $dir handlers implementation.tcl] \
         [file join $dir handlers reports.tcl] \
-        [file join $dir handlers netlist.tcl]]
+        [file join $dir handlers netlist.tcl] \
+        [file join $dir handlers hardware.tcl] \
+        [file join $dir handlers constraints.tcl] \
+        [file join $dir handlers runs.tcl]]
 
     foreach f $files {
         if {![file exists $f]} {
@@ -139,7 +142,10 @@ proc ::vmcp::server::reload {} {
         [file join $dir handlers synthesis.tcl] \
         [file join $dir handlers implementation.tcl] \
         [file join $dir handlers reports.tcl] \
-        [file join $dir handlers netlist.tcl]]
+        [file join $dir handlers netlist.tcl] \
+        [file join $dir handlers hardware.tcl] \
+        [file join $dir handlers constraints.tcl] \
+        [file join $dir handlers runs.tcl]]
 
     set ok   0
     set fail 0

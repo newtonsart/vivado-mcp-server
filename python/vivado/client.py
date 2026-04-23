@@ -111,7 +111,9 @@ class VivadoClient:
             attempt += 1
             try:
                 log.info("connecting to %s:%d (attempt %d)", self.host, self.port, attempt)
-                reader, writer = await asyncio.open_connection(self.host, self.port)
+                reader, writer = await asyncio.open_connection(
+                    self.host, self.port, limit=64 * 1024 * 1024
+                )
                 self._reader = reader
                 self._writer = writer
                 self._connected = True

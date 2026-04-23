@@ -7,10 +7,13 @@ initializing if needed) the shared VivadoClient.
 """
 
 from tools import (
+    constraints,
+    hardware,
     implementation,
     netlist,
     project,
     reports,
+    runs,
     synthesis,
 )
 
@@ -22,6 +25,9 @@ def register_all(mcp, client_factory) -> None:
     implementation.register(mcp, client_factory)
     reports.register(mcp, client_factory)
     netlist.register(mcp, client_factory)
+    hardware.register(mcp, client_factory)
+    constraints.register(mcp, client_factory)
+    runs.register(mcp, client_factory)
 
 
 __all__ = ["register_all"]

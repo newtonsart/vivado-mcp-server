@@ -22,6 +22,10 @@ Vivado (GUI or batch, already open by the user)
 - **Localhost only**: the socket binds explicitly to `127.0.0.1`. Remote connections are rejected.
 - **Multi-client FIFO queue**: multiple clients can connect; commands are serialized.
 - **Notifications**: events such as `run_complete` are broadcast to all connected clients.
+- **Hot-reload**: `reload_plugin` re-sources handler files without restarting Vivado or losing the TCP connection.
+- **Large reports to disk**: every big `report_*` tool accepts an optional `path=` to dump the full report to a file (avoids the socket 64 KB line limit).
+- **JTAG debug**: full Hardware Manager support — program FPGA, capture ILAs, drive VIOs, JTAG-to-AXI peek/poke.
+- **Timing closure helpers**: set constraints (create_clock, set_false_path, multicycle, clock_groups), switch run strategies, track WNS/TNS across iterations.
 - **Escape hatch `run_tcl`**: for any operation that doesn't have a dedicated tool yet.
 
 ## Structure
@@ -148,41 +152,121 @@ Each message is a JSON object on a single line (`\n`). The channel is configured
 
 ## Exposed Tools
 
+Meta / connection:
+
 | Tool                  | Description                                                  |
 |-----------------------|--------------------------------------------------------------|
 | `check_connection`    | Ping the TCL plugin                                          |
+| `reload_plugin`       | Re-source handler files without restarting Vivado            |
+| `run_tcl`             | **Escape hatch**: execute arbitrary TCL                      |
+
+Project & sources:
+
+| Tool                  | Description                                                  |
+|-----------------------|--------------------------------------------------------------|
 | `open_project`        | Open an `.xpr` file                                          |
 | `close_project`       | Close the current project                                    |
 | `get_project_info`    | Name, part, top, runs, paths                                 |
+| `write_checkpoint`    | Save design state to `.dcp`                                  |
+| `write_xdc`           | Export constraints of the open design                        |
+| `read_xdc`            | Add an `.xdc` file to a constraints fileset                  |
+| `set_top`             | `set_property top` on a source fileset                       |
+
+Runs & flow:
+
+| Tool                  | Description                                                  |
+|-----------------------|--------------------------------------------------------------|
 | `run_synthesis`       | Launch `launch_runs synth_1`, with progress events           |
 | `run_implementation`  | Launch `launch_runs impl_1`, with progress events            |
 | `generate_bitstream`  | Launch `launch_runs impl_1 -to_step write_bitstream`         |
 | `get_run_status`      | Snapshot of STATUS/PROGRESS of a run                         |
 | `reset_run`           | `reset_run <run>`                                            |
-| `get_timing_summary`  | `report_timing_summary` + WNS/TNS/WHS/THS extraction        |
+| `list_strategies`     | Enumerate synth or impl strategies                           |
+| `set_run_strategy`    | `set_property strategy` on a run (optional reset)            |
+| `get_run_stats`       | Strategy + status + WNS/TNS/WHS/THS + elapsed                |
+| `wait_on_run`         | Block until run completes or timeout                         |
+
+Reports (all big ones accept optional `path=` to dump to file):
+
+| Tool                  | Description                                                  |
+|-----------------------|--------------------------------------------------------------|
+| `get_timing_summary`  | `report_timing_summary` + WNS/TNS/WHS/THS extraction         |
 | `get_timing_paths`    | `get_timing_paths` (top N paths)                             |
 | `get_utilization`     | `report_utilization` + table parsing                         |
 | `get_messages`        | Filter by severity                                           |
 | `get_drc`             | `report_drc`                                                 |
+| `get_power_report`    | `report_power` (requires implemented design)                 |
+| `get_cdc_report`      | `report_cdc` — clock domain crossing analysis                |
+| `get_methodology_violations` | `report_methodology`                                  |
+| `get_io_report`       | `report_io` — I/O pin assignments and standards              |
+| `get_fanout_report`   | `report_high_fanout_nets`                                    |
+
+Netlist queries:
+
+| Tool                  | Description                                                  |
+|-----------------------|--------------------------------------------------------------|
 | `get_cells`           | `get_cells <pattern>` with `-hierarchical` support           |
 | `get_nets`            | `get_nets <pattern>`                                         |
 | `get_ports`           | `get_ports <pattern>`                                        |
 | `get_clocks`          | `get_clocks`                                                 |
 | `get_design_hierarchy`| Module tree up to `max_depth`                                |
-| `run_tcl`             | **Escape hatch**: execute arbitrary TCL                      |
+
+Timing constraints (in-memory; use `write_xdc` to persist):
+
+| Tool                  | Description                                                  |
+|-----------------------|--------------------------------------------------------------|
+| `create_clock`        | Primary clock on a port/pin                                  |
+| `create_generated_clock` | Derived from an existing clock                            |
+| `set_input_delay`     | I/O timing relative to a clock                               |
+| `set_output_delay`    | Same, output side                                            |
+| `set_false_path`      | Ignore timing on a path                                      |
+| `set_multicycle_path` | Relax by N cycles                                            |
+| `set_clock_groups`    | Mark clocks as async/exclusive (common CDC waiver)           |
+| `report_exceptions`   | `report_exceptions` — list all false/multicycle/groups       |
+
+Hardware Manager (JTAG):
+
+| Tool                  | Description                                                  |
+|-----------------------|--------------------------------------------------------------|
+| `connect_hw`          | open_hw_manager + connect_hw_server + open_hw_target         |
+| `disconnect_hw`       | Teardown                                                     |
+| `get_hw_info`         | Server + target + devices + ILAs + VIOs inventory            |
+| `program_device`      | Flash `.bit` (+ optional `.ltx`)                             |
+| `list_hw_probes`      | Probes on an ILA/VIO core                                    |
+| `set_ila_trigger`     | Single-probe compare on an ILA                               |
+| `arm_ila`             | Configure depth/position/mode + `run_hw_ila`                 |
+| `wait_ila`            | Block until trigger or timeout                               |
+| `read_ila_data`       | Upload capture to CSV or VCD                                 |
+| `get_vio`             | Refresh + read a VIO input probe                             |
+| `set_vio`             | Write + commit a VIO output probe                            |
+| `list_hw_axis`        | Enumerate JTAG-to-AXI masters                                |
+| `axi_read`            | AXI read via JTAG (peek)                                     |
+| `axi_write`           | AXI write via JTAG (poke, supports bursts)                   |
 
 ## Timeouts
 
-Defined in `python/config.py`:
+Defined in `python/config.py` (`COMMAND_TIMEOUTS` dict). Representative values:
 
-| Category                        | Timeout (s) |
-|---------------------------------|-------------|
-| Fast (`get_*`, `close_project`) | 30          |
-| `open_project`                  | 120         |
-| `run_synthesis`, `run_implementation`, `generate_bitstream` | 7200 |
-| `run_tcl`                       | 600         |
+| Category                                                    | Timeout (s) |
+|-------------------------------------------------------------|-------------|
+| Fast (`get_*`, `close_project`, constraints setters)        | 30          |
+| `open_project`, medium reports, `wait_ila`                  | 60–300      |
+| `program_device`, `get_power_report`                        | 300         |
+| `run_synthesis`, `run_implementation`, `generate_bitstream`, `wait_on_run` | 3600–7200   |
+| `run_tcl`                                                   | 600         |
 
-Can be overridden in code by modifying `COMMAND_TIMEOUTS` before starting the server.
+Override by editing `COMMAND_TIMEOUTS` or by passing a bigger `timeout=` from any tool call in code.
+
+## Extending
+
+To add a new tool:
+
+1. **TCL handler**: add a `proc ::vmcp::handlers::<domain>::<name>` in `tcl/handlers/<domain>.tcl`, then register with `::vmcp::dispatcher::register <cmd> <proc>`. Return `"__async__"` for long-running ops (see `synthesis.tcl`).
+2. **Python tool**: add a `@mcp.tool()` function in `python/tools/<domain>.py` inside `register(mcp, client_factory)`. Call `client.send_command("<cmd>", params, timeout=config.timeout_for("<cmd>"))`.
+3. **Timeout**: add an entry in `python/config.py` `COMMAND_TIMEOUTS`.
+4. **Reload**: run `install/install_windows.ps1` then call `reload_plugin` (TCL) + restart the MCP process (Python).
+
+See `TODO.md` in the repo root for the current backlog of pro features.
 
 ## Development
 

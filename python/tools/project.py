@@ -60,6 +60,85 @@ def register(mcp, client_factory) -> None:
         return _format_project_info(data)
 
 
+    @mcp.tool()
+    async def write_checkpoint(path: str) -> str:
+        """Write a design checkpoint (.dcp) to disk.
+
+        Saves the current state of the open design so it can be reopened
+        later with open_checkpoint (via run_tcl) without re-running synthesis
+        or implementation.
+
+        Args:
+            path: absolute path for the output .dcp file (e.g. "C:/work/post_impl.dcp").
+        """
+        client = await client_factory()
+        data = await client.send_command(
+            "write_checkpoint",
+            {"path": path},
+            timeout=config.timeout_for("write_checkpoint"),
+        )
+        written = data.get("written", False)
+        out_path = data.get("path", path)
+        if written:
+            return f"Checkpoint written: {out_path}"
+        return f"write_checkpoint completed (path={out_path})"
+
+    @mcp.tool()
+    async def write_xdc(path: str, constraints_only: bool = False) -> str:
+        """Export constraints of the open project to an XDC file.
+
+        Args:
+            path: absolute output .xdc path.
+            constraints_only: if True, add -constraints ONLY (skip ports).
+        """
+        client = await client_factory()
+        data = await client.send_command(
+            "write_xdc",
+            {"path": path, "constraints_only": constraints_only},
+            timeout=config.timeout_for("write_xdc"),
+        )
+        size = data.get("size_bytes", 0)
+        return f"XDC written: {data.get('path', path)} ({size} bytes)"
+
+    @mcp.tool()
+    async def read_xdc(path: str, fileset: str = "") -> str:
+        """Add an XDC constraint file to a constraints fileset.
+
+        Args:
+            path: absolute path to the .xdc file.
+            fileset: target constraints fileset. Empty → current constrset.
+        """
+        client = await client_factory()
+        data = await client.send_command(
+            "read_xdc",
+            {"path": path, "fileset": fileset},
+            timeout=config.timeout_for("read_xdc"),
+        )
+        return (
+            f"XDC added to fileset '{data.get('fileset', '?')}': "
+            f"{data.get('path', path)}"
+        )
+
+    @mcp.tool()
+    async def set_top(top: str, fileset: str = "") -> str:
+        """Set the top module of a source fileset.
+
+        Args:
+            top: top module name (VHDL entity / Verilog module).
+            fileset: source fileset. Empty → current_fileset.
+        """
+        client = await client_factory()
+        data = await client.send_command(
+            "set_top",
+            {"top": top, "fileset": fileset},
+            timeout=config.timeout_for("set_top"),
+        )
+        return (
+            f"Top set to '{data.get('top', top)}' "
+            f"on fileset '{data.get('fileset', '?')}'"
+        )
+
+
 def _format_project_info(data: Dict[str, Any]) -> str:
     """Format project info in a human-readable layout."""
     lines = []

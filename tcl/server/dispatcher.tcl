@@ -242,7 +242,10 @@ proc ::vmcp::dispatcher::handler_reload {client_id req_id params} {
         [file join $src_dir handlers synthesis.tcl] \
         [file join $src_dir handlers implementation.tcl] \
         [file join $src_dir handlers reports.tcl] \
-        [file join $src_dir handlers netlist.tcl]]
+        [file join $src_dir handlers netlist.tcl] \
+        [file join $src_dir handlers hardware.tcl] \
+        [file join $src_dir handlers constraints.tcl] \
+        [file join $src_dir handlers runs.tcl]]
 
     set ok 0
     set fail 0
