@@ -2,10 +2,11 @@
 
 All variables can be overridden via environment:
 
-    VMCP_HOST           (default "127.0.0.1")
-    VMCP_PORT           (default 7654)
-    VMCP_RECONNECT_MAX  (default 30, maximum backoff in seconds)
-    VMCP_LOGLEVEL       (default "INFO")
+    VMCP_HOST                 (default "127.0.0.1")
+    VMCP_PORT                 (default 7654)
+    VMCP_RECONNECT_MAX        (default 30, maximum backoff in seconds)
+    VMCP_RECONNECT_ATTEMPTS   (default 5; 0 = unlimited)
+    VMCP_LOGLEVEL             (default "INFO")
 
 Command timeouts can be inspected and modified in `COMMAND_TIMEOUTS`.
 """
@@ -22,10 +23,12 @@ HOST: str = os.environ.get("VMCP_HOST", "127.0.0.1")
 PORT: int = int(os.environ.get("VMCP_PORT", "7654"))
 
 # Reconnection retries when Vivado is not yet running or has been closed.
-# Exponential backoff up to RECONNECT_MAX seconds.
+# Exponential backoff up to RECONNECT_MAX seconds. Default 5 attempts (~31 s
+# total with 1/2/4/8/16 s backoff) — fails fast so tool calls don't hang when
+# Vivado is not running. Set VMCP_RECONNECT_ATTEMPTS=0 for unlimited retries.
 RECONNECT_INITIAL_DELAY: float = 1.0
 RECONNECT_MAX_DELAY: float = float(os.environ.get("VMCP_RECONNECT_MAX", "30"))
-RECONNECT_MAX_ATTEMPTS: int = int(os.environ.get("VMCP_RECONNECT_ATTEMPTS", "0"))  # 0 = unlimited
+RECONNECT_MAX_ATTEMPTS: int = int(os.environ.get("VMCP_RECONNECT_ATTEMPTS", "5"))
 
 # -----------------------------------------------------------------------------
 # Logging

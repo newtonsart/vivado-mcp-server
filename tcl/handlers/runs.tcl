@@ -164,11 +164,11 @@ proc ::vmcp::handlers::runs::stats {client_id req_id params} {
             status   $status \
             strategy $strategy \
             progress [::vmcp::json::num $progress] \
-            wns      $wns \
-            tns      $tns \
-            whs      $whs \
-            ths      $ths \
-            wpws     $wpws \
+            wns      [::vmcp::json::num_or_null $wns] \
+            tns      [::vmcp::json::num_or_null $tns] \
+            whs      [::vmcp::json::num_or_null $whs] \
+            ths      [::vmcp::json::num_or_null $ths] \
+            wpws     [::vmcp::json::num_or_null $wpws] \
             failed_routes [::vmcp::json::num $failed] \
             elapsed  $elapsed]]
     return ok
@@ -216,8 +216,8 @@ proc ::vmcp::handlers::runs::wait {client_id req_id params} {
         [::vmcp::json::obj [list \
             run       $run \
             status    $status \
-            wns       $wns \
-            tns       $tns \
+            wns       [::vmcp::json::num_or_null $wns] \
+            tns       [::vmcp::json::num_or_null $tns] \
             completed [::vmcp::json::bool $ok]]]
     return ok
 }

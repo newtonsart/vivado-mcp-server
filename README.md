@@ -37,11 +37,14 @@ vivado-mcp-server/
 │   ├── server/                   # TCP, NDJSON protocol, FIFO queue
 │   ├── handlers/                 # Handlers by domain (project, synthesis…)
 │   └── lib/                      # json.tcl + logger.tcl
-├── python/                       # Python MCP server
-│   ├── server.py                 # Entry point (FastMCP stdio)
-│   ├── config.py                 # Host, port, per-command timeouts
-│   ├── vivado/                   # Asyncio TCP client
-│   └── tools/                    # @mcp.tool() by domain
+├── python/
+│   └── vivado_mcp_server/        # Python MCP server (package)
+│       ├── __init__.py
+│       ├── __main__.py           # `python -m vivado_mcp_server`
+│       ├── server.py             # FastMCP stdio entry point
+│       ├── config.py             # Host, port, per-command timeouts
+│       ├── vivado/               # Asyncio TCP client
+│       └── tools/                # @mcp.tool() by domain
 ├── install/
 │   ├── install_windows.ps1       # Injects source line into Vivado_init.tcl
 │   └── mcp_config_example.json   # Config snippet for claude_desktop_config.json
@@ -78,7 +81,7 @@ pip install -e .
 Or run directly from the repo without installing (requires [uv](https://docs.astral.sh/uv/)):
 
 ```bash
-uv run python -m server
+uv run python -m vivado_mcp_server
 ```
 
 ### 3. Claude Desktop
@@ -103,7 +106,7 @@ Add to your `claude_desktop_config.json`. Two options:
   "mcpServers": {
     "vivado": {
       "command": "uv",
-      "args": ["run", "--project", "C:/path/to/vivado-mcp-server", "python", "-m", "server"],
+      "args": ["run", "--project", "C:/path/to/vivado-mcp-server", "python", "-m", "vivado_mcp_server"],
       "env": { "VMCP_HOST": "127.0.0.1", "VMCP_PORT": "7654" }
     }
   }

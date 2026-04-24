@@ -11,7 +11,7 @@ from __future__ import annotations
 import json
 from typing import Any, Dict, Optional
 
-import config
+from .. import config
 
 
 def register(mcp, client_factory) -> None:

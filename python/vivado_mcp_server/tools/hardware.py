@@ -9,7 +9,7 @@ from __future__ import annotations
 import json
 from typing import Any, Dict
 
-import config
+from .. import config
 
 
 def register(mcp, client_factory) -> None:
@@ -224,6 +224,12 @@ def register(mcp, client_factory) -> None:
             axi: hw_axi master name substring.
             addr: hex address (e.g. "40000000").
             len: number of 32-bit beats (default 1).
+
+        Returns:
+            JSON with a `data` field. `data` is Vivado's DATA property on
+            the transaction: a space-separated list of hex words, no
+            0x prefix, in beat order — e.g. `"deadbeef cafebabe"` for
+            len=2. A single-beat read returns one hex word.
         """
         client = await client_factory()
         data = await client.send_command(

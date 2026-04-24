@@ -9,19 +9,27 @@ from __future__ import annotations
 import json
 from typing import Any, Dict
 
-import config
+from .. import config
 
 
 def register(mcp, client_factory) -> None:
     """Register project tools in the MCP instance."""
 
     @mcp.tool()
-    async def open_project(path: str, read_only: bool = False) -> str:
+    async def open_project(
+        path: str,
+        read_only: bool = False,
+        force: bool = False,
+    ) -> str:
         """Open a Vivado project (.xpr).
 
         Args:
             path: absolute or relative path to the .xpr file.
             read_only: if True, open the project in read-only mode.
+            force: if True, close any other open project first (potentially
+                   discarding unsaved changes). If False (default) and a
+                   different project is already open, the call fails with
+                   PROJECT_OPEN.
 
         Returns:
             JSON with project information: name, part, top, runs.
@@ -29,7 +37,7 @@ def register(mcp, client_factory) -> None:
         client = await client_factory()
         data = await client.send_command(
             "open_project",
-            {"path": path, "read_only": read_only},
+            {"path": path, "read_only": read_only, "force": force},
             timeout=config.timeout_for("open_project"),
         )
         return json.dumps(data, indent=2, ensure_ascii=False)

@@ -6,7 +6,7 @@ is a callable `() -> Awaitable[VivadoClient]` that returns (lazily
 initializing if needed) the shared VivadoClient.
 """
 
-from tools import (
+from . import (
     constraints,
     hardware,
     implementation,

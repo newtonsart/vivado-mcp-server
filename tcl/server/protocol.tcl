@@ -22,14 +22,14 @@ namespace eval ::vmcp::protocol {}
 proc ::vmcp::protocol::send_raw {client_id json_line} {
     set chan [::vmcp::core::get_channel $client_id]
     if {$chan eq ""} {
-        ::vmcp::log::debug "send_raw: client $client_id not found (message discarded)"
+        ::vmcp::log::log_debug "send_raw: client $client_id not found (message discarded)"
         return 0
     }
     if {[catch {
         puts $chan $json_line
         flush $chan
     } err]} {
-        ::vmcp::log::warn "send_raw: write error for client $client_id: $err"
+        ::vmcp::log::log_warn "send_raw: write error for client $client_id: $err"
         ::vmcp::core::disconnect_client $client_id
         return 0
     }
@@ -72,12 +72,11 @@ proc ::vmcp::protocol::send_progress {client_id req_id percent message} {
 # ------------------------------------------------------------------------------
 # Send a successful final result.
 #
-#   data_json: may be a pre-formed JSON string (object/array), or a simple
-#              value. A TCL dict is packaged as a JSON object.
+#   data: a tagged JSON wrapper (::vmcp::json::obj / ::arr / ::num / ::bool),
+#         an even-length key/value list (wrapped as an object), or a plain
+#         string.
 # ------------------------------------------------------------------------------
 proc ::vmcp::protocol::send_result {client_id req_id data} {
-    # If the value is already pre-formatted JSON (##JSON:obj## / ##JSON:arr##),
-    # use it as-is; otherwise convert to object.
     set data_encoded [::vmcp::protocol::_normalize_data $data]
     set msg [::vmcp::json::obj [list \
         id     $req_id \
@@ -121,17 +120,14 @@ proc ::vmcp::protocol::broadcast_notification {event data} {
 # ------------------------------------------------------------------------------
 # Normalize `data` to embed as a JSON sub-value.
 # Accepts:
-#   - pre-formatted JSON (##JSON:obj## / ##JSON:arr## / ##JSON:raw##)
-#   - TCL dict / even-length key-value list
+#   - a tagged JSON wrapper (::vmcp::json::obj / ::arr / ::num / ::bool / ::null)
+#   - TCL dict / even-length key-value list  -> wrapped as JSON object
 #   - plain string
 # ------------------------------------------------------------------------------
 proc ::vmcp::protocol::_normalize_data {data} {
-    if {[string first "##JSON:obj##" $data] == 0 || \
-        [string first "##JSON:arr##" $data] == 0 || \
-        [string first "##JSON:raw##" $data] == 0} {
+    if {[::vmcp::json::_is_tagged $data]} {
         return $data
     }
-    # Even-length list -> treat as dict.
     if {[llength $data] % 2 == 0 && [llength $data] > 0} {
         return [::vmcp::json::obj $data]
     }

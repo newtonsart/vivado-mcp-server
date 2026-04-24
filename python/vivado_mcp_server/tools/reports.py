@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from typing import Any, Dict
 
-import config
+from .. import config
 
 
 def register(mcp, client_factory) -> None:
@@ -215,19 +215,25 @@ def _format_report(data: Dict[str, Any], name: str) -> str:
 
 
 def _format_timing_summary(data: Dict[str, Any]) -> str:
-    wns = data.get("wns", "")
-    tns = data.get("tns", "")
-    whs = data.get("whs", "")
-    ths = data.get("ths", "")
+    wns = data.get("wns")
+    tns = data.get("tns")
+    whs = data.get("whs")
+    ths = data.get("ths")
     lines = [f"Timing summary for {data.get('run', '?')}:"]
-    lines.append(f"  WNS: {wns} ns")
-    lines.append(f"  TNS: {tns} ns")
-    lines.append(f"  WHS: {whs} ns")
-    lines.append(f"  THS: {ths} ns")
+    lines.append(f"  WNS: {_fmt_ns(wns)}")
+    lines.append(f"  TNS: {_fmt_ns(tns)}")
+    lines.append(f"  WHS: {_fmt_ns(whs)}")
+    lines.append(f"  THS: {_fmt_ns(ths)}")
     verdict = _timing_verdict(wns, whs)
     if verdict:
         lines.append(f"  Verdict: {verdict}")
     return "\n".join(lines)
+
+
+def _fmt_ns(v: Any) -> str:
+    if v is None or v == "":
+        return "(n/a)"
+    return f"{v} ns"
 
 
 def _timing_verdict(wns: Any, whs: Any) -> str:

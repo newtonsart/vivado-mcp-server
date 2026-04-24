@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from typing import Any, Dict, Optional
 
-import config
-from tools.synthesis import _format_run_result  # noqa: F401 (reused here)
+from .. import config
+from .synthesis import _format_run_result  # noqa: F401 (reused here)
 
 
 def register(mcp, client_factory) -> None:

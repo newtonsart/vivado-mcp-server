@@ -2,7 +2,7 @@
 
 Typical usage (outside of the MCP context):
 
-    from vivado.client import VivadoClient
+    from vivado_mcp_server.vivado import VivadoClient
 
     async def main():
         async with VivadoClient() as vv:
@@ -14,8 +14,8 @@ The package also exposes the error types: `VivadoError`,
 `VivadoConnectionError`, `VivadoTimeoutError`.
 """
 
-from vivado.client import VivadoClient
-from vivado.exceptions import (
+from .client import VivadoClient
+from .exceptions import (
     VivadoConnectionError,
     VivadoError,
     VivadoProtocolError,

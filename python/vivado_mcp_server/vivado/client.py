@@ -29,8 +29,8 @@ import asyncio
 import logging
 from typing import Any, Awaitable, Callable, Dict, Optional
 
-from vivado import protocol as proto
-from vivado.exceptions import (
+from . import protocol as proto
+from .exceptions import (
     VivadoConnectionError,
     VivadoProtocolError,
     VivadoRemoteError,
@@ -189,7 +189,7 @@ class VivadoClient:
             await self.connect()
 
         request = proto.Request(command=command, params=params or {})
-        future: asyncio.Future = asyncio.get_event_loop().create_future()
+        future: asyncio.Future = asyncio.get_running_loop().create_future()
         self._pending[request.id] = {
             "future": future,
             "progress_cb": progress_cb,

@@ -27,6 +27,11 @@ proc ::vmcp::handlers::project::open {client_id req_id params} {
         set v [dict get $params read_only]
         if {[string is true -strict $v]} { set read_only 1 }
     }
+    set force 0
+    if {[dict exists $params force]} {
+        set v [dict get $params force]
+        if {[string is true -strict $v]} { set force 1 }
+    }
 
     if {![file exists $path]} {
         ::vmcp::protocol::send_error $client_id $req_id \
@@ -34,8 +39,21 @@ proc ::vmcp::handlers::project::open {client_id req_id params} {
         return
     }
 
-    # Close any currently open project to avoid warnings.
-    catch {close_project -quiet}
+    # Refuse to close an unrelated open project unless force=true. Prevents
+    # silently discarding in-progress work.
+    if {[catch {current_project} cp] == 0 && $cp ne ""} {
+        set cur_xpr ""
+        catch { set cur_xpr [get_property XPR_FILE [current_project]] }
+        set want [file normalize $path]
+        set have [file normalize $cur_xpr]
+        if {$have ne $want && !$force} {
+            ::vmcp::protocol::send_error $client_id $req_id \
+                "PROJECT_OPEN" \
+                "A different project is already open: $cur_xpr. Close it first or pass force=true."
+            return
+        }
+        catch {close_project -quiet}
+    }
 
     set cmd [list open_project $path]
     if {$read_only} { lappend cmd -read_only }

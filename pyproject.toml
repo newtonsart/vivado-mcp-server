@@ -28,7 +28,7 @@ dev = [
 ]
 
 [project.scripts]
-vivado-mcp-server = "server:main"
+vivado-mcp-server = "vivado_mcp_server:main"
 
 [project.urls]
 Documentation = "https://github.com/newtonsart/vivado-mcp-server"
@@ -36,17 +36,14 @@ Repository    = "https://github.com/newtonsart/vivado-mcp-server"
 Issues        = "https://github.com/newtonsart/vivado-mcp-server/issues"
 
 # ------------------------------------------------------------------------------
-# Packaging: code lives under `python/`, not `src/`. Flat modules (`server`,
-# `config`) and packages (`vivado`, `tools`) are declared explicitly.
+# Packaging: code lives under `python/vivado_mcp_server/` as a proper package.
 # ------------------------------------------------------------------------------
 [tool.setuptools]
 package-dir = { "" = "python" }
-# Flat modules (no __init__.py) under python/: server.py and config.py.
-py-modules  = ["server", "config"]
 
 [tool.setuptools.packages.find]
 where = ["python"]
-include = ["vivado*", "tools*"]
+include = ["vivado_mcp_server*"]
 
 [tool.ruff]
 line-length = 100

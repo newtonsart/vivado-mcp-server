@@ -1,9 +1,9 @@
 """Entry point for the `vivado-mcp-server` MCP server.
 
 Typical usage:
-    python -m server                    # stdio MCP (for Claude Desktop / Codex)
-    python server.py                    # same
-    python server.py --host 127.0.0.1 --port 7654
+    python -m vivado_mcp_server                          # stdio MCP
+    vivado-mcp-server                                    # console script
+    python -m vivado_mcp_server --host 127.0.0.1 --port 7654
 
 Supported environment variables (see config.py): VMCP_HOST, VMCP_PORT,
 VMCP_LOGLEVEL, VMCP_RECONNECT_MAX, VMCP_RECONNECT_ATTEMPTS.
@@ -13,14 +13,17 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import json
 import logging
 import sys
-from typing import Optional
+import time
+from collections import deque
+from typing import Any, Deque, Dict, Optional
 
-import config
-import tools as tools_pkg
-from vivado.client import VivadoClient
-from vivado.exceptions import VivadoError
+from . import config
+from . import tools as tools_pkg
+from .vivado.client import VivadoClient
+from .vivado.exceptions import VivadoError
 
 # -----------------------------------------------------------------------------
 # Official Anthropic MCP SDK dependency. Install with `pip install mcp`.
@@ -46,6 +49,22 @@ log = logging.getLogger("vivado-mcp-server.server")
 _client: Optional[VivadoClient] = None
 _client_lock = asyncio.Lock()
 
+# Server-initiated notifications (run_complete, run_failed, bitstream_complete,
+# ...) arrive asynchronously on the TCP connection. We buffer them in a
+# bounded deque so an LLM can poll `get_recent_events` after dispatching a
+# long-running command or reconnecting.
+_event_buffer: Deque[Dict[str, Any]] = deque(maxlen=200)
+
+
+def _on_notification(event: str, data: Dict[str, Any]) -> None:
+    _event_buffer.append(
+        {
+            "timestamp": time.time(),
+            "event": event,
+            "data": data,
+        }
+    )
+
 
 async def get_client() -> VivadoClient:
     """Return the shared VivadoClient, creating/connecting it if needed."""
@@ -59,6 +78,7 @@ async def get_client() -> VivadoClient:
                 reconnect_max_delay=config.RECONNECT_MAX_DELAY,
                 reconnect_max_attempts=config.RECONNECT_MAX_ATTEMPTS,
             )
+            _client.add_notification_handler(_on_notification)
         if not _client.connected:
             try:
                 await _client.connect()
@@ -116,6 +136,27 @@ async def run_tcl(expr: str) -> str:
 
 
 @mcp.tool()
+async def get_recent_events(limit: int = 20) -> str:
+    """Return recent server-pushed notifications (run_complete, run_failed,
+    bitstream_complete, ...).
+
+    The Python client buffers up to 200 notifications as they arrive on the
+    TCP connection. Poll this tool after dispatching an async command (e.g.
+    `run_synthesis`) or after reconnecting to recover missed events.
+
+    Args:
+        limit: maximum number of most-recent events to return (default 20).
+    """
+    items = list(_event_buffer)
+    if limit > 0:
+        items = items[-limit:]
+    items.reverse()
+    if not items:
+        return "(no events buffered)"
+    return json.dumps(items, indent=2, ensure_ascii=False)
+
+
+@mcp.tool()
 async def reload_plugin(source_dir: str = "") -> str:
     """Hot-reload all TCL handler files in the running Vivado plugin.
 
@@ -137,6 +178,33 @@ async def reload_plugin(source_dir: str = "") -> str:
     return (
         f"Reload complete.\n"
         f"  source_dir: {data.get('source_dir', '?')}"
+    )
+
+
+@mcp.tool()
+async def restart_server(delay_seconds: float = 1.0) -> str:
+    """Exit the Python MCP process so the host (Claude Desktop / Codex)
+    re-launches it. Use after editing Python tool code — the plugin TCL
+    socket survives because it lives inside Vivado, only the Python side
+    is replaced. Host auto-reconnects on the next tool call.
+
+    Args:
+        delay_seconds: grace period before exit so this response can flush
+                       over stdio (default 1.0).
+    """
+    async def _exit_later() -> None:
+        await asyncio.sleep(max(0.1, float(delay_seconds)))
+        log.info("restart_server: exiting for host-side restart")
+        # os._exit bypasses pending-coroutine cleanup that would otherwise
+        # keep the process alive after FastMCP has half-shut-down.
+        import os
+        os._exit(0)
+
+    asyncio.create_task(_exit_later())
+    return (
+        f"Python MCP server will exit in {delay_seconds:.1f}s. "
+        f"The next tool call from the host will spawn a fresh process "
+        f"with any new/edited tools registered."
     )
 
 

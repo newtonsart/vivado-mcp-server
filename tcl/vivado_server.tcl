@@ -49,6 +49,7 @@ proc ::vmcp::server::_source_all {} {
         [file join $dir server   protocol.tcl] \
         [file join $dir server   core.tcl] \
         [file join $dir server   dispatcher.tcl] \
+        [file join $dir handlers runs_common.tcl] \
         [file join $dir handlers project.tcl] \
         [file join $dir handlers synthesis.tcl] \
         [file join $dir handlers implementation.tcl] \
@@ -115,7 +116,7 @@ proc ::vmcp::server::start {{port ""} {host ""}} {
 
     # Defense-in-depth: force localhost even if a different IP is passed.
     if {$host ne "127.0.0.1" && $host ne "localhost" && $host ne "::1"} {
-        ::vmcp::log::warn "host '$host' is not localhost; forcing 127.0.0.1"
+        ::vmcp::log::log_warn "host '$host' is not localhost; forcing 127.0.0.1"
         set host "127.0.0.1"
     }
 
@@ -138,6 +139,7 @@ proc ::vmcp::server::reload {} {
     variable SCRIPT_DIR
     set dir $::vmcp::server::SCRIPT_DIR
     set handler_files [list \
+        [file join $dir handlers runs_common.tcl] \
         [file join $dir handlers project.tcl] \
         [file join $dir handlers synthesis.tcl] \
         [file join $dir handlers implementation.tcl] \
@@ -171,6 +173,15 @@ proc ::vmcp::server::reload {} {
 # ==============================================================================
 # BOOTSTRAP
 # ==============================================================================
+
+# Re-source guard: Vivado re-runs Vivado_init.tcl on start_gui and some
+# project operations. We must not re-bind the TCP socket or re-log the banner.
+if {[info exists ::vmcp::core::started] && $::vmcp::core::started} {
+    # Already running. Silently re-register handlers only (hot-reload-friendly).
+    ::vmcp::server::_source_all
+    ::vmcp::server::_register_builtins
+    return
+}
 
 ::vmcp::server::_source_all
 ::vmcp::server::_configure_logging

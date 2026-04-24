@@ -43,9 +43,12 @@ proc ::vmcp::handlers::hardware::connect {client_id req_id params} {
         set v [dict get $params server_url]
         if {$v ne ""} { set url $v }
     }
-    if {[catch {open_hw_manager} err opts]} {
-        # Already open is fine.
-        if {![string match -nocase "*already*" $err]} {
+    # Only open hw_manager if no hw_server already connected. Avoids
+    # a locale-dependent string match on the "already open" error.
+    set hs ""
+    catch { set hs [current_hw_server] }
+    if {$hs eq ""} {
+        if {[catch {open_hw_manager} err opts]} {
             ::vmcp::protocol::send_error $client_id $req_id \
                 "HW_ERROR" "open_hw_manager failed: $err" \
                 [dict get $opts -errorinfo]
@@ -204,13 +207,25 @@ proc ::vmcp::handlers::hardware::program {client_id req_id params} {
             return
         }
     }
-    set dev [current_hw_device]
+    set dev ""
+    catch { set dev [current_hw_device] }
     if {[dict exists $params device] && [dict get $params device] ne ""} {
         set want [dict get $params device]
         foreach d [get_hw_devices] {
             if {[string match -nocase "*$want*" $d]} { set dev $d; break }
         }
         catch {current_hw_device $dev}
+    }
+    if {$dev eq ""} {
+        # No device selected and none discoverable on this target.
+        set all [list]
+        catch { set all [get_hw_devices] }
+        if {[llength $all] > 0} { set dev [lindex $all 0]; catch {current_hw_device $dev} }
+    }
+    if {$dev eq ""} {
+        ::vmcp::protocol::send_error $client_id $req_id \
+            "NO_HW_DEVICE" "No hw_device selected on current hw_target"
+        return
     }
     if {[catch {set_property PROGRAM.FILE $bit $dev} err opts]} {
         ::vmcp::protocol::send_error $client_id $req_id \

@@ -3,40 +3,90 @@
 # ------------------------------------------------------------------------------
 # Minimal JSON encode/decode compatible with TCL 8.5.
 #
-# Tries to use tcllib (`package require json` / `json::write`) if available,
-# since Vivado typically ships it. Falls back to a custom implementation that
-# covers the protocol's use cases:
-#   - strings, integers, floats, booleans, null
-#   - lists (JSON arrays)
-#   - TCL dicts (JSON objects) — keys are strings
+# Typing: TCL has no native types, so the encoder wraps non-string values in
+# a tagged-dict envelope with keys `__vmcp_j` (type) and `__vmcp_v` (value).
+# A value is recognised as tagged only when it is a valid dict with exactly
+# those two keys, so accidental collision with user strings is effectively
+# impossible.
 #
-# Typing in TCL: since TCL does not distinguish types natively, encoding uses
-# these heuristics:
-#   - value "true"/"false" -> JSON boolean (unambiguous)
-#   - value "null"         -> JSON null
-#   - value "##JSON:raw##..." -> emitted as-is (escape hatch)
-#   - TCL dict             -> JSON object (alphabetic keys detected)
-#   - TCL even-length list -> JSON object only if forced via helper
+# To produce typed values, use the helpers:
+#   ::vmcp::json::num  <numeric>          -> JSON number
+#   ::vmcp::json::bool <anything>         -> JSON true/false
+#   ::vmcp::json::null                    -> JSON null
+#   ::vmcp::json::obj  {k1 v1 k2 v2 ...}  -> JSON object
+#   ::vmcp::json::arr  {v1 v2 v3 ...}     -> JSON array
 #
-# To force types, use the helpers:
-#   ::vmcp::json::num  value
-#   ::vmcp::json::str  value
-#   ::vmcp::json::bool value
-#   ::vmcp::json::null
-#   ::vmcp::json::obj  {k1 v1 k2 v2 ...}
-#   ::vmcp::json::arr  {v1 v2 ...}
+# Any other value is encoded as a JSON string (with RFC 8259 escaping).
+# Tagged values nest freely:
+#   ::vmcp::json::obj [list count [::vmcp::json::num 5] ok [::vmcp::json::bool 1]]
+#
+# `::vmcp::json::emit` flattens a (possibly nested) tagged structure into the
+# final JSON text.
 # ==============================================================================
 
 namespace eval ::vmcp::json {
     variable have_tcllib 0
 }
 
-if {[catch {package require json} _err] == 0 && \
-    [catch {package require json::write} _err] == 0} {
+# Decoder uses tcllib if available (faster, more robust).
+if {[catch {package require json} _err] == 0} {
     set ::vmcp::json::have_tcllib 1
-    # Force keys in the order given (not alphabetical) for reproducible output.
-    catch {::json::write indented 0}
-    catch {::json::write aligned  0}
+}
+
+# ------------------------------------------------------------------------------
+# Typed-value constructors.
+# ------------------------------------------------------------------------------
+proc ::vmcp::json::num {v} {
+    # Emit as raw JSON number if parseable; fall back to 0 otherwise so we
+    # never produce invalid JSON.
+    if {[string is integer -strict $v]} {
+        return [dict create __vmcp_j raw __vmcp_v $v]
+    }
+    if {[string is double -strict $v]} {
+        return [dict create __vmcp_j raw __vmcp_v $v]
+    }
+    return [dict create __vmcp_j raw __vmcp_v 0]
+}
+
+proc ::vmcp::json::bool {v} {
+    if {[string is true -strict $v]} {
+        return [dict create __vmcp_j raw __vmcp_v true]
+    }
+    return [dict create __vmcp_j raw __vmcp_v false]
+}
+
+proc ::vmcp::json::null {} {
+    return [dict create __vmcp_j raw __vmcp_v null]
+}
+
+# Empty string → JSON null; numeric → JSON number; else → null (never quoted).
+# For fields like timing stats where the cached value may be missing.
+proc ::vmcp::json::num_or_null {v} {
+    set v [string trim $v]
+    if {$v eq ""} { return [::vmcp::json::null] }
+    if {[string is integer -strict $v]} { return [::vmcp::json::num $v] }
+    if {[string is double  -strict $v]} { return [::vmcp::json::num $v] }
+    return [::vmcp::json::null]
+}
+
+proc ::vmcp::json::obj {kv} {
+    return [dict create __vmcp_j obj __vmcp_v $kv]
+}
+
+proc ::vmcp::json::arr {items} {
+    return [dict create __vmcp_j arr __vmcp_v $items]
+}
+
+# ------------------------------------------------------------------------------
+# Detect a tagged wrapper. Must be a dict with exactly __vmcp_j and __vmcp_v
+# keys — guards against even-length user lists that merely look dict-shaped.
+# ------------------------------------------------------------------------------
+proc ::vmcp::json::_is_tagged {value} {
+    if {[catch {dict size $value} sz]} { return 0 }
+    if {$sz != 2} { return 0 }
+    if {![dict exists $value __vmcp_j]} { return 0 }
+    if {![dict exists $value __vmcp_v]} { return 0 }
+    return 1
 }
 
 # ------------------------------------------------------------------------------
@@ -50,12 +100,11 @@ proc ::vmcp::json::_escape_string {s} {
         switch -- $c {
             "\""    { append out "\\\"" }
             "\\"    { append out "\\\\" }
-            "/"     { append out "/"     }
-            "\b"    { append out "\\b"   }
-            "\f"    { append out "\\f"   }
-            "\n"    { append out "\\n"   }
-            "\r"    { append out "\\r"   }
-            "\t"    { append out "\\t"   }
+            "\b"    { append out "\\b"  }
+            "\f"    { append out "\\f"  }
+            "\n"    { append out "\\n"  }
+            "\r"    { append out "\\r"  }
+            "\t"    { append out "\\t"  }
             default {
                 scan $c %c code
                 if {$code < 0x20} {
@@ -70,74 +119,38 @@ proc ::vmcp::json::_escape_string {s} {
 }
 
 # ------------------------------------------------------------------------------
-# Explicit type helpers (wrap values in an internal marker).
-# ------------------------------------------------------------------------------
-proc ::vmcp::json::num  {v}    { return "##JSON:raw##$v" }
-proc ::vmcp::json::str  {v}    { return [::vmcp::json::_escape_string $v] \
-                                        "##JSON:strraw##" }
-proc ::vmcp::json::bool {v} {
-    if {[string is true -strict $v]} { return "##JSON:raw##true" }
-    return "##JSON:raw##false"
-}
-proc ::vmcp::json::null {}     { return "##JSON:raw##null" }
-
-# ------------------------------------------------------------------------------
-# Encode a TCL value to JSON.
-#
-# Rules:
-#   - "##JSON:raw##X"   -> emit X without quotes (numbers, bool, null)
-#   - dict with key "__type" = "object" -> JSON object
-#   - dict with key "__type" = "array"  -> JSON array
-#   - otherwise treated as string.
-#
-# Use ::vmcp::json::obj to build objects; ::vmcp::json::arr for arrays.
+# Encode a value (plain string or tagged wrapper) to JSON text.
 # ------------------------------------------------------------------------------
 proc ::vmcp::json::encode {value} {
-    # Raw marker (numbers, bool, null)
-    if {[string first "##JSON:raw##" $value] == 0} {
-        return [string range $value 12 end]
+    if {[::vmcp::json::_is_tagged $value]} {
+        set tag [dict get $value __vmcp_j]
+        set v   [dict get $value __vmcp_v]
+        switch -- $tag {
+            raw { return $v }
+            obj {
+                set parts [list]
+                foreach {k sub} $v {
+                    lappend parts "[::vmcp::json::_escape_string $k]:[::vmcp::json::encode $sub]"
+                }
+                return "\{[join $parts ,]\}"
+            }
+            arr {
+                set parts [list]
+                foreach sub $v {
+                    lappend parts [::vmcp::json::encode $sub]
+                }
+                return "\[[join $parts ,]\]"
+            }
+        }
     }
-    # Pre-formatted object marker
-    if {[string first "##JSON:obj##" $value] == 0} {
-        return [string range $value 12 end]
-    }
-    # Pre-formatted array marker
-    if {[string first "##JSON:arr##" $value] == 0} {
-        return [string range $value 12 end]
-    }
-    # Default: string
     return [::vmcp::json::_escape_string $value]
 }
 
 # ------------------------------------------------------------------------------
-# Build a JSON object from a dict (flat key/value list).
-# Values are encoded recursively.
-# ------------------------------------------------------------------------------
-proc ::vmcp::json::obj {kvlist} {
-    set parts [list]
-    foreach {k v} $kvlist {
-        lappend parts "[::vmcp::json::_escape_string $k]:[::vmcp::json::encode $v]"
-    }
-    return "##JSON:obj##\{[join $parts ,]\}"
-}
-
-# ------------------------------------------------------------------------------
-# Build a JSON array from a list.
-# ------------------------------------------------------------------------------
-proc ::vmcp::json::arr {items} {
-    set parts [list]
-    foreach v $items {
-        lappend parts [::vmcp::json::encode $v]
-    }
-    return "##JSON:arr##\[[join $parts ,]\]"
-}
-
-# ------------------------------------------------------------------------------
-# Emit final JSON (strips internal markers at the root).
+# Emit final JSON text from a (possibly nested) tagged value.
 # ------------------------------------------------------------------------------
 proc ::vmcp::json::emit {value} {
-    set out [::vmcp::json::encode $value]
-    return $out
+    return [::vmcp::json::encode $value]
 }
 
 # ==============================================================================
@@ -151,13 +164,11 @@ proc ::vmcp::json::emit {value} {
 proc ::vmcp::json::decode {json} {
     variable have_tcllib
     if {$have_tcllib} {
-        # tcllib returns dicts for objects, lists for arrays.
         if {[catch {::json::json2dict $json} result]} {
             error "JSON decode error: $result"
         }
         return $result
     }
-    # Fallback: recursive parser.
     upvar 0 ::vmcp::json::_pos pos
     set pos 0
     set result [::vmcp::json::_parse_value $json]
@@ -190,7 +201,6 @@ proc ::vmcp::json::_parse_value {json} {
             if {[string match {[-0-9]} $c]} {
                 return [::vmcp::json::_parse_number $json]
             }
-            # true / false / null
             if {[string range $json $pos [expr {$pos+3}]] eq "true"} {
                 incr pos 4
                 return "true"
@@ -210,7 +220,7 @@ proc ::vmcp::json::_parse_value {json} {
 
 proc ::vmcp::json::_parse_object {json} {
     upvar 0 ::vmcp::json::_pos pos
-    incr pos   ;# consume open-brace
+    incr pos
     set result [dict create]
     ::vmcp::json::_skip_ws $json
     if {[string index $json $pos] eq "\}"} {
@@ -247,7 +257,7 @@ proc ::vmcp::json::_parse_object {json} {
 
 proc ::vmcp::json::_parse_array {json} {
     upvar 0 ::vmcp::json::_pos pos
-    incr pos   ;# consume "["
+    incr pos
     set result [list]
     ::vmcp::json::_skip_ws $json
     if {[string index $json $pos] eq "\]"} {
@@ -274,7 +284,7 @@ proc ::vmcp::json::_parse_array {json} {
 
 proc ::vmcp::json::_parse_string {json} {
     upvar 0 ::vmcp::json::_pos pos
-    incr pos   ;# consume opening "
+    incr pos
     set out ""
     set len [string length $json]
     while {$pos < $len} {
@@ -317,7 +327,10 @@ proc ::vmcp::json::_parse_number {json} {
     set start $pos
     set len [string length $json]
     if {[string index $json $pos] eq "-"} { incr pos }
-    while {$pos < $len && [string match {[0-9.eE+-]} [string index $json $pos]]} {
+    # Glob char class: `-` must be first (or escaped) to be literal; placing
+    # `+-` at the end turns it into the ASCII range `+`(43)..`-`(45), which
+    # silently matches `,`(44) and walks past the end of the number.
+    while {$pos < $len && [string match {[-+0-9.eE]} [string index $json $pos]]} {
         incr pos
     }
     return [string range $json $start [expr {$pos-1}]]

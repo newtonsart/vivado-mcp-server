@@ -17,9 +17,9 @@
 # ==============================================================================
 
 namespace eval ::vmcp::handlers::synthesis {
-    # Per-req_id state for in-progress polls.
-    # key: req_id -> dict {client_id ... run_name ... jobs ... start_ts ...}
-    variable active_polls [dict create]
+    # Per-req_id state for in-progress polls. Guard against re-source wiping
+    # state during an active run.
+    if {![info exists active_polls]} { variable active_polls [dict create] }
 }
 
 # ------------------------------------------------------------------------------
@@ -62,7 +62,7 @@ proc ::vmcp::handlers::synthesis::run {client_id req_id params} {
 
     # Reset if requested.
     if {$reset} {
-        ::vmcp::log::info "reset_run $run_name (before launch)"
+        ::vmcp::log::log_info "reset_run $run_name (before launch)"
         catch {reset_run $run_name}
     }
 
@@ -91,41 +91,33 @@ proc ::vmcp::handlers::synthesis::run {client_id req_id params} {
 
 # ------------------------------------------------------------------------------
 # Periodic poll: checks STATUS/PROGRESS and emits progress or result.
+# Shared pieces live in ::vmcp::runs (handlers/runs_common.tcl).
 # ------------------------------------------------------------------------------
 proc ::vmcp::handlers::synthesis::_poll {req_id} {
     variable active_polls
 
-    if {![dict exists $active_polls $req_id]} {
-        # Polling was cancelled (client disconnected, project closed, ...).
-        return
-    }
+    if {![dict exists $active_polls $req_id]} return
     set ctx [dict get $active_polls $req_id]
     set client_id [dict get $ctx client_id]
     set run_name  [dict get $ctx run_name]
 
-    # If the client is gone, stop polling but do NOT abort the run.
-    if {[::vmcp::core::get_channel $client_id] eq ""} {
-        ::vmcp::log::info "poll $run_name: client $client_id disconnected, stopping poll"
+    if {[::vmcp::runs::client_gone $client_id]} {
+        ::vmcp::log::log_info "poll $run_name: client $client_id disconnected, stopping poll"
         dict unset active_polls $req_id
         ::vmcp::dispatcher::release_async
         return
     }
 
-    # Read run state.
-    if {[catch {get_property STATUS   [get_runs $run_name]} status]} {
-        ::vmcp::protocol::send_error $client_id $req_id \
-            "POLL_FAILED" "Cannot read run STATUS: $status"
+    set state [::vmcp::runs::read_state $client_id $req_id $run_name]
+    if {$state eq ""} {
         dict unset active_polls $req_id
         ::vmcp::dispatcher::release_async
         return
     }
-    set progress_raw 0
-    catch { set progress_raw [get_property PROGRESS [get_runs $run_name]] }
-    set pct [::vmcp::handlers::synthesis::_percent $progress_raw]
+    lassign $state status pct
 
-    # Complete?
     if {[string match -nocase "*Complete*" $status]} {
-        ::vmcp::log::info "run $run_name: Complete"
+        ::vmcp::log::log_info "run $run_name: Complete"
         ::vmcp::protocol::send_result $client_id $req_id \
             [::vmcp::handlers::synthesis::_final_payload $run_name $status $pct ok]
         dict unset active_polls $req_id
@@ -135,10 +127,8 @@ proc ::vmcp::handlers::synthesis::_poll {req_id} {
         return
     }
 
-    # Failed / Error?
-    if {[string match -nocase "*Error*"  $status] || \
-        [string match -nocase "*Failed*" $status]} {
-        ::vmcp::log::warn "run $run_name: Failed ($status)"
+    if {[::vmcp::runs::is_failed $status]} {
+        ::vmcp::log::log_warn "run $run_name: Failed ($status)"
         ::vmcp::protocol::send_error $client_id $req_id \
             "RUN_FAILED" "Synthesis run failed" $status
         dict unset active_polls $req_id
@@ -148,53 +138,29 @@ proc ::vmcp::handlers::synthesis::_poll {req_id} {
         return
     }
 
-    # Still running -> emit progress only if pct changed (avoid spam).
     set last_pct [dict get $ctx last_pct]
-    if {$pct != $last_pct} {
-        ::vmcp::protocol::send_progress $client_id $req_id $pct $status
-        dict set ctx last_pct $pct
-        dict set active_polls $req_id $ctx
-    }
+    set new_last [::vmcp::runs::maybe_emit_progress $client_id $req_id $status $pct $last_pct]
+    dict set ctx last_pct $new_last
+    dict set active_polls $req_id $ctx
 
-    # Schedule next poll.
     after 5000 [list ::vmcp::handlers::synthesis::_poll $req_id]
 }
 
 # ------------------------------------------------------------------------------
-# Extract an integer 0-100 from the PROGRESS value (may arrive as "15%").
-# ------------------------------------------------------------------------------
-proc ::vmcp::handlers::synthesis::_percent {raw} {
-    set clean [regsub -all {%} $raw ""]
-    set clean [string trim $clean]
-    if {[string is integer -strict $clean]} { return $clean }
-    if {[string is double  -strict $clean]} { return [expr {int($clean)}] }
-    return 0
-}
-
-# ------------------------------------------------------------------------------
-# Build the final payload for a completed run.
+# Build the final payload for a completed run. Cached STATS.* are only
+# meaningful once synth_design has written a DCP.
 # ------------------------------------------------------------------------------
 proc ::vmcp::handlers::synthesis::_final_payload {run_name status pct outcome} {
-    set wns ""
-    set tns ""
-    set whs ""
-    set ths ""
-    catch {
-        # Only meaningful if synth_design generated a DCP.
-        set wns [get_property STATS.WNS [get_runs $run_name]]
-        set tns [get_property STATS.TNS [get_runs $run_name]]
-        set whs [get_property STATS.WHS [get_runs $run_name]]
-        set ths [get_property STATS.THS [get_runs $run_name]]
-    }
+    set t [::vmcp::runs::timing_stats $run_name]
     return [::vmcp::json::obj [list \
         run      $run_name \
         status   $status \
         progress [::vmcp::json::num $pct] \
         outcome  $outcome \
-        wns      $wns \
-        tns      $tns \
-        whs      $whs \
-        ths      $ths]]
+        wns      [::vmcp::json::num_or_null [dict get $t wns]] \
+        tns      [::vmcp::json::num_or_null [dict get $t tns]] \
+        whs      [::vmcp::json::num_or_null [dict get $t whs]] \
+        ths      [::vmcp::json::num_or_null [dict get $t ths]]]]
 }
 
 # ------------------------------------------------------------------------------
@@ -210,7 +176,7 @@ proc ::vmcp::handlers::synthesis::status {client_id req_id params} {
     set status [get_property STATUS [get_runs $run_name]]
     set prog   0
     catch { set prog [get_property PROGRESS [get_runs $run_name]] }
-    set pct [::vmcp::handlers::synthesis::_percent $prog]
+    set pct [::vmcp::runs::percent $prog]
 
     ::vmcp::protocol::send_result $client_id $req_id \
         [::vmcp::json::obj [list \

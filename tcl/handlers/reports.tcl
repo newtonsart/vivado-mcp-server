@@ -110,11 +110,11 @@ proc ::vmcp::handlers::reports::timing_summary {client_id req_id params} {
         ::vmcp::protocol::send_result $client_id $req_id \
             [::vmcp::json::obj [list \
                 run         $run_name \
-                wns         $wns \
-                tns         $tns \
-                whs         $whs \
-                ths         $ths \
-                failed_nets $fails \
+                wns         [::vmcp::json::num_or_null $wns] \
+                tns         [::vmcp::json::num_or_null $tns] \
+                whs         [::vmcp::json::num_or_null $whs] \
+                ths         [::vmcp::json::num_or_null $ths] \
+                failed_nets [::vmcp::json::num_or_null $fails] \
                 report      $note]]
         return ok
     }
@@ -145,11 +145,11 @@ proc ::vmcp::handlers::reports::timing_summary {client_id req_id params} {
     ::vmcp::protocol::send_result $client_id $req_id \
         [::vmcp::json::obj [list \
             run         $run_name \
-            wns         $wns \
-            tns         $tns \
-            whs         $whs \
-            ths         $ths \
-            failed_nets $fails \
+            wns         [::vmcp::json::num_or_null $wns] \
+            tns         [::vmcp::json::num_or_null $tns] \
+            whs         [::vmcp::json::num_or_null $whs] \
+            ths         [::vmcp::json::num_or_null $ths] \
+            failed_nets [::vmcp::json::num_or_null $fails] \
             report      $report]]
     return ok
 }
@@ -190,7 +190,7 @@ proc ::vmcp::handlers::reports::timing_paths {client_id req_id params} {
         catch { set to    [get_property ENDPOINT_PIN $p] }
         catch { set group [get_property GROUP $p] }
         lappend out [::vmcp::json::obj [list \
-            slack $slack \
+            slack [::vmcp::json::num_or_null $slack] \
             from  $from \
             to    $to \
             group $group]]

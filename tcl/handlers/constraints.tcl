@@ -307,7 +307,9 @@ proc ::vmcp::handlers::constraints::set_clock_groups {client_id req_id params} {
         lappend cmd -name [dict get $params name]
     }
     foreach g $groups {
-        lappend cmd -group [get_clocks -quiet $g]
+        # $g is a list of clock names; expand so get_clocks sees each as a
+        # separate pattern arg, not a single combined pattern string.
+        lappend cmd -group [get_clocks -quiet {*}$g]
     }
     if {[catch {eval $cmd} err opts]} {
         ::vmcp::protocol::send_error $client_id $req_id \

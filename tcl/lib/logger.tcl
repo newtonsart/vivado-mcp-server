@@ -19,10 +19,10 @@ namespace eval ::vmcp::log {
         WARN  30
         ERROR 40
     }
-
-    variable current_level 20    ;# INFO by default
-    variable log_file ""
-    variable log_chan ""
+    # Guard mutable state against re-source.
+    if {![::info exists current_level]} { variable current_level 20 }
+    if {![::info exists log_file]}      { variable log_file "" }
+    if {![::info exists log_chan]}      { variable log_chan "" }
 }
 
 # ------------------------------------------------------------------------------
@@ -32,7 +32,7 @@ proc ::vmcp::log::set_level {name} {
     variable level_num
     variable current_level
     set name [string toupper $name]
-    if {[::info exists level_num($name)]} {
+    if {[::::info exists level_num($name)]} {
         set current_level $level_num($name)
     }
 }
@@ -79,7 +79,7 @@ proc ::vmcp::log::_emit {level msg} {
     variable log_chan
 
     set level [string toupper $level]
-    if {![::info exists level_num($level)]} {
+    if {![::::info exists level_num($level)]} {
         set level "INFO"
     }
     if {$level_num($level) < $current_level} {
@@ -98,7 +98,11 @@ proc ::vmcp::log::_emit {level msg} {
     }
 }
 
-proc ::vmcp::log::debug {msg} { ::vmcp::log::_emit DEBUG $msg }
-proc ::vmcp::log::info  {msg} { ::vmcp::log::_emit INFO  $msg }
-proc ::vmcp::log::warn  {msg} { ::vmcp::log::_emit WARN  $msg }
-proc ::vmcp::log::error {msg} { ::vmcp::log::_emit ERROR $msg }
+# Names are prefixed `log_` to avoid shadowing the Tcl builtins `info` and
+# `error` when unqualified `info`/`error` is resolved via namespace path. Vivado
+# internals call `info frame` on every GUI redraw; a shadowed `info` would fire
+# the logger instead. Kept ALL uppercase unused — use log_{debug,info,warn,error}.
+proc ::vmcp::log::log_debug {msg} { ::vmcp::log::_emit DEBUG $msg }
+proc ::vmcp::log::log_info  {msg} { ::vmcp::log::_emit INFO  $msg }
+proc ::vmcp::log::log_warn  {msg} { ::vmcp::log::_emit WARN  $msg }
+proc ::vmcp::log::log_error {msg} { ::vmcp::log::_emit ERROR $msg }

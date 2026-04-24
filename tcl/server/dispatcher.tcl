@@ -17,15 +17,13 @@
 # ==============================================================================
 
 namespace eval ::vmcp::dispatcher {
-    variable queue {}          ;# list of {client_id raw_line}
-    variable busy  0           ;# 1 while a command is in flight
-    variable current_client "" ;# client whose command is currently executing
-    variable current_req_id ""
-    variable async_refcount 0  ;# reference counter for async commands
-    # Preserve handler registrations across re-source / reload.
-    if {![info exists handlers]} {
-        variable handlers [dict create]
-    }
+    # Guard every state var so re-source does not wipe in-flight state.
+    if {![info exists queue]}           { variable queue {} }
+    if {![info exists busy]}            { variable busy  0 }
+    if {![info exists current_client]}  { variable current_client "" }
+    if {![info exists current_req_id]}  { variable current_req_id "" }
+    if {![info exists async_refcount]}  { variable async_refcount 0 }
+    if {![info exists handlers]}        { variable handlers [dict create] }
 }
 
 # ------------------------------------------------------------------------------
@@ -39,7 +37,7 @@ namespace eval ::vmcp::dispatcher {
 proc ::vmcp::dispatcher::register {name proc_ref} {
     variable handlers
     dict set handlers $name $proc_ref
-    ::vmcp::log::debug "handler registered: $name -> $proc_ref"
+    ::vmcp::log::log_debug "handler registered: $name -> $proc_ref"
 }
 
 # ------------------------------------------------------------------------------
@@ -78,7 +76,7 @@ proc ::vmcp::dispatcher::_process_next {} {
 
     # If the client disconnected in the meantime, discard the command.
     if {[::vmcp::core::get_channel $client_id] eq ""} {
-        ::vmcp::log::debug "discarding command from disconnected client $client_id"
+        ::vmcp::log::log_debug "discarding command from disconnected client $client_id"
         after idle ::vmcp::dispatcher::_process_next
         return
     }
@@ -88,7 +86,7 @@ proc ::vmcp::dispatcher::_process_next {} {
 
     # Parse JSON.
     if {[catch {::vmcp::protocol::parse_request $raw_line} parsed]} {
-        ::vmcp::log::warn "malformed command from client $client_id: $parsed"
+        ::vmcp::log::log_warn "malformed command from client $client_id: $parsed"
         # No valid req_id available; emit with empty id.
         ::vmcp::protocol::send_error $client_id "" "BAD_REQUEST" \
             "Malformed request" $parsed
@@ -101,7 +99,7 @@ proc ::vmcp::dispatcher::_process_next {} {
     set params  [expr {[dict exists $parsed params] ? [dict get $parsed params] : [dict create]}]
     set current_req_id $req_id
 
-    ::vmcp::log::info "▶ client=$client_id cmd=$command id=$req_id"
+    ::vmcp::log::log_info "▶ client=$client_id cmd=$command id=$req_id"
 
     # Look up the handler.
     variable handlers
@@ -118,7 +116,7 @@ proc ::vmcp::dispatcher::_process_next {} {
         set rc [eval [list $proc_ref $client_id $req_id $params]]
     } errmsg opts]} {
         set detail [dict get $opts -errorinfo]
-        ::vmcp::log::error "handler $command threw exception: $errmsg\n$detail"
+        ::vmcp::log::log_error "handler $command threw exception: $errmsg\n$detail"
         ::vmcp::protocol::send_error $client_id $req_id \
             "TCL_ERROR" $errmsg $detail
         ::vmcp::dispatcher::_release
@@ -128,7 +126,7 @@ proc ::vmcp::dispatcher::_process_next {} {
     # If the handler returns "__async__", the dispatcher stays busy until
     # the handler explicitly calls `release_async`.
     if {$rc eq "__async__"} {
-        ::vmcp::log::debug "handler $command marked as async"
+        ::vmcp::log::log_debug "handler $command marked as async"
         # busy stays at 1; we do not release until release_async is called.
         return
     }
@@ -202,7 +200,7 @@ proc ::vmcp::dispatcher::handler_run_tcl {client_id req_id params} {
         return
     }
     set expr [dict get $params expr]
-    ::vmcp::log::info "run_tcl: $expr"
+    ::vmcp::log::log_info "run_tcl: $expr"
     set catchcode [catch {uplevel #0 $expr} result opts]
     if {$catchcode == 1} {
         set detail ""
@@ -238,6 +236,7 @@ proc ::vmcp::dispatcher::handler_reload {client_id req_id params} {
     }
 
     set handler_files [list \
+        [file join $src_dir handlers runs_common.tcl] \
         [file join $src_dir handlers project.tcl] \
         [file join $src_dir handlers synthesis.tcl] \
         [file join $src_dir handlers implementation.tcl] \

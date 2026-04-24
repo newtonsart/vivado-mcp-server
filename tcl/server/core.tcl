@@ -12,15 +12,16 @@
 # ==============================================================================
 
 namespace eval ::vmcp::core {
-    variable server_socket ""
-    variable port          7654
-    variable host          "127.0.0.1"
-    variable clients       [dict create]
-    variable next_client_id 1
-    variable started       0
-
-    # Per-channel partial read buffers for non-blocking gets.
-    variable read_buffer  [dict create]
+    # Guards so re-sourcing (Vivado re-runs Vivado_init.tcl on start_gui and
+    # some project ops) does NOT wipe the running server state. Only set the
+    # defaults on the first load.
+    if {![::info exists server_socket]} { variable server_socket "" }
+    if {![::info exists port]}          { variable port          7654 }
+    if {![::info exists host]}          { variable host          "127.0.0.1" }
+    if {![::info exists clients]}       { variable clients       [dict create] }
+    if {![::info exists next_client_id]} { variable next_client_id 1 }
+    if {![::info exists started]}       { variable started       0 }
+    if {![::info exists read_buffer]}   { variable read_buffer   [dict create] }
 }
 
 # ------------------------------------------------------------------------------
@@ -64,7 +65,7 @@ proc ::vmcp::core::disconnect_client {client_id} {
     if {[dict exists $read_buffer $chan]} {
         dict unset read_buffer $chan
     }
-    ::vmcp::log::info "client $client_id disconnected"
+    ::vmcp::log::log_info "client $client_id disconnected"
     # Notify the dispatcher in case it had queued commands for this client.
     ::vmcp::dispatcher::on_client_disconnect $client_id
 }
@@ -78,7 +79,7 @@ proc ::vmcp::core::_accept_connection {chan addr port} {
 
     # Security: only accept localhost connections.
     if {$addr ne "127.0.0.1" && $addr ne "::1"} {
-        ::vmcp::log::warn "connection rejected from $addr (not localhost)"
+        ::vmcp::log::log_warn "connection rejected from $addr (not localhost)"
         catch {close $chan}
         return
     }
@@ -95,13 +96,13 @@ proc ::vmcp::core::_accept_connection {chan addr port} {
     if {[catch {
         fconfigure $chan -blocking 0 -buffering line -translation lf -encoding utf-8
     } err]} {
-        ::vmcp::log::error "fconfigure failed for client $id: $err"
+        ::vmcp::log::log_error "fconfigure failed for client $id: $err"
         ::vmcp::core::disconnect_client $id
         return
     }
 
     fileevent $chan readable [list ::vmcp::core::_on_readable $id $chan]
-    ::vmcp::log::info "client $id connected from $addr:$port"
+    ::vmcp::log::log_info "client $id connected from $addr:$port"
 }
 
 # ------------------------------------------------------------------------------
@@ -121,7 +122,7 @@ proc ::vmcp::core::_on_readable {client_id chan} {
     # characters in the line, or -1 if no complete line is available yet.
     while {1} {
         if {[catch {gets $chan line} n]} {
-            ::vmcp::log::warn "error reading from client $client_id: $n"
+            ::vmcp::log::log_warn "error reading from client $client_id: $n"
             ::vmcp::core::disconnect_client $client_id
             return
         }
@@ -136,7 +137,7 @@ proc ::vmcp::core::_on_readable {client_id chan} {
         set trimmed [string trim $line]
         if {$trimmed eq ""} { continue }
 
-        ::vmcp::log::debug "<- client $client_id: $trimmed"
+        ::vmcp::log::log_debug "<- client $client_id: $trimmed"
         ::vmcp::dispatcher::enqueue_command $client_id $trimmed
     }
 }
@@ -149,7 +150,7 @@ proc ::vmcp::core::start {{port 7654} {host "127.0.0.1"}} {
     variable started
 
     if {$started} {
-        ::vmcp::log::info "server already started, ignoring start"
+        ::vmcp::log::log_info "server already started, ignoring start"
         return
     }
 
@@ -161,11 +162,11 @@ proc ::vmcp::core::start {{port 7654} {host "127.0.0.1"}} {
         set server_socket [socket -server ::vmcp::core::_accept_connection \
                                   -myaddr $host $port]
     } err]} {
-        ::vmcp::log::error "could not open socket on $host:$port -> $err"
+        ::vmcp::log::log_error "could not open socket on $host:$port -> $err"
         return
     }
     set started 1
-    ::vmcp::log::info "server listening on $host:$port"
+    ::vmcp::log::log_info "server listening on $host:$port"
 }
 
 # ------------------------------------------------------------------------------
@@ -189,5 +190,5 @@ proc ::vmcp::core::stop {} {
         set server_socket ""
     }
     set started 0
-    ::vmcp::log::info "server stopped"
+    ::vmcp::log::log_info "server stopped"
 }

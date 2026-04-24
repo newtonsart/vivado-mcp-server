@@ -9,7 +9,7 @@
 # ==============================================================================
 
 namespace eval ::vmcp::handlers::impl {
-    variable active_polls [dict create]
+    if {![info exists active_polls]} { variable active_polls [dict create] }
 }
 
 # ------------------------------------------------------------------------------
@@ -123,7 +123,8 @@ proc ::vmcp::handlers::impl::bitstream {client_id req_id params} {
 }
 
 # ------------------------------------------------------------------------------
-# Shared poll: reuses _percent helper from synthesis.tcl.
+# Poll loop: reuses helpers from ::vmcp::runs (handlers/runs_common.tcl).
+# The "done" condition branches on whether we're tracking impl or bitstream.
 # ------------------------------------------------------------------------------
 proc ::vmcp::handlers::impl::_poll {req_id} {
     variable active_polls
@@ -134,28 +135,24 @@ proc ::vmcp::handlers::impl::_poll {req_id} {
     set run_name  [dict get $ctx run_name]
     set bitstream [dict get $ctx bitstream]
 
-    if {[::vmcp::core::get_channel $client_id] eq ""} {
-        ::vmcp::log::info "poll $run_name: client $client_id disconnected"
+    if {[::vmcp::runs::client_gone $client_id]} {
+        ::vmcp::log::log_info "poll $run_name: client $client_id disconnected"
         dict unset active_polls $req_id
         ::vmcp::dispatcher::release_async
         return
     }
 
-    if {[catch {get_property STATUS [get_runs $run_name]} status]} {
-        ::vmcp::protocol::send_error $client_id $req_id \
-            "POLL_FAILED" "Cannot read run STATUS: $status"
+    set state [::vmcp::runs::read_state $client_id $req_id $run_name]
+    if {$state eq ""} {
         dict unset active_polls $req_id
         ::vmcp::dispatcher::release_async
         return
     }
-    set prog 0
-    catch { set prog [get_property PROGRESS [get_runs $run_name]] }
-    set pct [::vmcp::handlers::synthesis::_percent $prog]
+    lassign $state status pct
 
-    # "Done" condition differs for impl vs bitstream:
+    # "Done" differs for impl vs bitstream:
     # - impl_1 Complete means place_design/route_design finished
-    # - with -to_step write_bitstream, Vivado sets status to
-    #   "write_bitstream Complete!"
+    # - `-to_step write_bitstream` sets status to "write_bitstream Complete!"
     set done 0
     if {$bitstream} {
         if {[string match -nocase "*write_bitstream*Complete*" $status] || \
@@ -167,7 +164,7 @@ proc ::vmcp::handlers::impl::_poll {req_id} {
     }
 
     if {$done} {
-        ::vmcp::log::info "run $run_name: Complete"
+        ::vmcp::log::log_info "run $run_name: Complete"
         set payload [::vmcp::handlers::impl::_final_payload $run_name $status $pct $bitstream]
         ::vmcp::protocol::send_result $client_id $req_id $payload
         dict unset active_polls $req_id
@@ -178,9 +175,8 @@ proc ::vmcp::handlers::impl::_poll {req_id} {
         return
     }
 
-    if {[string match -nocase "*Error*"  $status] || \
-        [string match -nocase "*Failed*" $status]} {
-        ::vmcp::log::warn "run $run_name: Failed ($status)"
+    if {[::vmcp::runs::is_failed $status]} {
+        ::vmcp::log::log_warn "run $run_name: Failed ($status)"
         ::vmcp::protocol::send_error $client_id $req_id \
             "RUN_FAILED" "Implementation run failed" $status
         dict unset active_polls $req_id
@@ -191,11 +187,9 @@ proc ::vmcp::handlers::impl::_poll {req_id} {
     }
 
     set last_pct [dict get $ctx last_pct]
-    if {$pct != $last_pct} {
-        ::vmcp::protocol::send_progress $client_id $req_id $pct $status
-        dict set ctx last_pct $pct
-        dict set active_polls $req_id $ctx
-    }
+    set new_last [::vmcp::runs::maybe_emit_progress $client_id $req_id $status $pct $last_pct]
+    dict set ctx last_pct $new_last
+    dict set active_polls $req_id $ctx
 
     after 5000 [list ::vmcp::handlers::impl::_poll $req_id]
 }
@@ -204,17 +198,8 @@ proc ::vmcp::handlers::impl::_poll {req_id} {
 # Build the final payload for impl / bitstream.
 # ------------------------------------------------------------------------------
 proc ::vmcp::handlers::impl::_final_payload {run_name status pct is_bitstream} {
-    set wns ""
-    set tns ""
-    set whs ""
-    set ths ""
+    set t [::vmcp::runs::timing_stats $run_name]
     set bitpath ""
-    catch {
-        set wns [get_property STATS.WNS [get_runs $run_name]]
-        set tns [get_property STATS.TNS [get_runs $run_name]]
-        set whs [get_property STATS.WHS [get_runs $run_name]]
-        set ths [get_property STATS.THS [get_runs $run_name]]
-    }
     if {$is_bitstream} {
         catch {
             set run_dir [get_property DIRECTORY [get_runs $run_name]]
@@ -227,10 +212,10 @@ proc ::vmcp::handlers::impl::_final_payload {run_name status pct is_bitstream} {
         run      $run_name \
         status   $status \
         progress [::vmcp::json::num $pct] \
-        wns      $wns \
-        tns      $tns \
-        whs      $whs \
-        ths      $ths]
+        wns      [::vmcp::json::num_or_null [dict get $t wns]] \
+        tns      [::vmcp::json::num_or_null [dict get $t tns]] \
+        whs      [::vmcp::json::num_or_null [dict get $t whs]] \
+        ths      [::vmcp::json::num_or_null [dict get $t ths]]]
     if {$is_bitstream} { lappend fields bitstream_path $bitpath }
     return [::vmcp::json::obj $fields]
 }
