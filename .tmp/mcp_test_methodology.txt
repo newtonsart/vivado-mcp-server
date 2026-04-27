@@ -1,0 +1,1059 @@
+Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2023 Advanced Micro Devices, Inc. All Rights Reserved.
+---------------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2023.2 (win64) Build 4029153 Fri Oct 13 20:14:34 MDT 2023
+| Date         : Mon Apr 27 14:54:55 2026
+| Host         : ARTURO-1 running 64-bit major release  (build 9200)
+| Command      : report_methodology -return_string
+| Design       : usw2000
+| Device       : xc7k160tffg676-3
+| Speed File   : -3
+| Design State : Fully Routed
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+Report Methodology
+
+Table of Contents
+-----------------
+1. REPORT SUMMARY
+2. REPORT DETAILS
+
+1. REPORT SUMMARY
+-----------------
+            Netlist: netlist
+          Floorplan: impl_1
+      Design limits: <entire design considered>
+             Max violations: <unlimited>
+             Violations found: 186
++-----------+------------------+-------------------------------------------------------------------------------------------------------+------------+
+| Rule      | Severity         | Description                                                                                           | Violations |
++-----------+------------------+-------------------------------------------------------------------------------------------------------+------------+
+| TIMING-6  | Critical Warning | No common primary clock between related clocks                                                        | 1          |
+| TIMING-7  | Critical Warning | No common node between related clocks                                                                 | 1          |
+| TIMING-17 | Critical Warning | Non-clocked sequential cell                                                                           | 1          |
+| LUTAR-1   | Warning          | LUT drives async reset alert                                                                          | 6          |
+| TIMING-9  | Warning          | Unknown CDC Logic                                                                                     | 1          |
+| TIMING-10 | Warning          | Missing property on synchronizer                                                                      | 1          |
+| TIMING-18 | Warning          | Missing input or output delay                                                                         | 10         |
+| TIMING-24 | Warning          | Overridden Max delay datapath only                                                                    | 1          |
+| TIMING-28 | Warning          | Auto-derived clock referenced by a timing constraint                                                  | 52         |
+| TIMING-47 | Warning          | False path, asynchronous clock group or max delay datapath only constraint between synchronous clocks | 30         |
+| ULMTCS-2  | Warning          | Control Sets use limits require reduction                                                             | 1          |
+| XDCB-5    | Warning          | Runtime inefficient way to find pin objects                                                           | 15         |
+| XDCC-4    | Warning          | User Clock constraint overwritten with the same name                                                  | 1          |
+| XDCC-8    | Warning          | User Clock constraint overwritten on the same source                                                  | 1          |
+| REQP-1959 | Advisory         | connects_SERDES_RST_driver_not_FF                                                                     | 64         |
++-----------+------------------+-------------------------------------------------------------------------------------------------------+------------+
+
+2. REPORT DETAILS
+-----------------
+TIMING-6#1 Critical Warning
+No common primary clock between related clocks  
+The clocks mgtclk0 and clkout2 are related (timed together) but they have no common primary clock. The design could fail in hardware. To find a timing path between these clocks, run the following command: report_timing -from [get_clocks mgtclk0] -to [get_clocks clkout2]
+Related violations: <none>
+
+TIMING-7#1 Critical Warning
+No common node between related clocks  
+The clocks mgtclk0 and clkout2 are related (timed together) but they have no common node. The design could fail in hardware. To find a timing path between these clocks, run the following command: report_timing -from [get_clocks mgtclk0] -to [get_clocks clkout2]
+Related violations: <none>
+
+TIMING-17#1 Critical Warning
+Non-clocked sequential cell  
+The clock pin genlock_top_inst/genlock_inst/pfd_ins/up_n_reg/C is not reached by a timing clock
+Related violations: <none>
+
+LUTAR-1#1 Warning
+LUT drives async reset alert  
+LUT cell ctrl_ddr3_inst/u_ctrl_ddr_mig/c0_u_ddr3_infrastructure/rst_tmp_phaser_ref__0, with 2 or more inputs, drives asynchronous preset/clear pin(s) ctrl_ddr3_inst/u_ctrl_ddr_mig/c0_u_ddr3_infrastructure/rstdiv0_sync_r1_reg_rep__7/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c0_u_ddr3_infrastructure/rstdiv0_sync_r1_reg_rep__8/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c0_u_ddr3_infrastructure/rstdiv0_sync_r1_reg_rep__9/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c0_u_ddr3_infrastructure/rstdiv0_sync_r_reg[0]/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c0_u_ddr3_infrastructure/rstdiv0_sync_r_reg[10]/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c0_u_ddr3_infrastructure/rstdiv0_sync_r_reg[11]/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c0_u_ddr3_infrastructure/rstdiv0_sync_r_reg[1]/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c0_u_ddr3_infrastructure/rstdiv0_sync_r_reg[2]/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c0_u_ddr3_infrastructure/rstdiv0_sync_r_reg[3]/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c0_u_ddr3_infrastructure/rstdiv0_sync_r_reg[4]/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c0_u_ddr3_infrastructure/rstdiv0_sync_r_reg[5]/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c0_u_ddr3_infrastructure/rstdiv0_sync_r_reg[6]/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c0_u_ddr3_infrastructure/rstdiv0_sync_r_reg[7]/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c0_u_ddr3_infrastructure/rstdiv0_sync_r_reg[8]/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c0_u_ddr3_infrastructure/rstdiv0_sync_r_reg[9]/PRE
+ (the first 15 of 53 listed). The LUT may glitch and trigger an unexpected reset, even if it is a properly timed path.
+Related violations: <none>
+
+LUTAR-1#2 Warning
+LUT drives async reset alert  
+LUT cell ctrl_ddr3_inst/u_ctrl_ddr_mig/c1_u_ddr3_infrastructure/rst_tmp_phaser_ref__0, with 2 or more inputs, drives asynchronous preset/clear pin(s) ctrl_ddr3_inst/u_ctrl_ddr_mig/c1_u_ddr3_infrastructure/rstdiv0_sync_r1_reg_rep__7/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c1_u_ddr3_infrastructure/rstdiv0_sync_r1_reg_rep__8/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c1_u_ddr3_infrastructure/rstdiv0_sync_r1_reg_rep__9/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c1_u_ddr3_infrastructure/rstdiv0_sync_r_reg[0]/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c1_u_ddr3_infrastructure/rstdiv0_sync_r_reg[10]/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c1_u_ddr3_infrastructure/rstdiv0_sync_r_reg[11]/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c1_u_ddr3_infrastructure/rstdiv0_sync_r_reg[1]/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c1_u_ddr3_infrastructure/rstdiv0_sync_r_reg[2]/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c1_u_ddr3_infrastructure/rstdiv0_sync_r_reg[3]/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c1_u_ddr3_infrastructure/rstdiv0_sync_r_reg[4]/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c1_u_ddr3_infrastructure/rstdiv0_sync_r_reg[5]/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c1_u_ddr3_infrastructure/rstdiv0_sync_r_reg[6]/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c1_u_ddr3_infrastructure/rstdiv0_sync_r_reg[7]/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c1_u_ddr3_infrastructure/rstdiv0_sync_r_reg[8]/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c1_u_ddr3_infrastructure/rstdiv0_sync_r_reg[9]/PRE
+ (the first 15 of 53 listed). The LUT may glitch and trigger an unexpected reset, even if it is a properly timed path.
+Related violations: <none>
+
+LUTAR-1#3 Warning
+LUT drives async reset alert  
+LUT cell ctrl_ddr3_inst/u_ctrl_ddr_mig/c2_u_ddr3_infrastructure/rst_tmp_phaser_ref__0, with 2 or more inputs, drives asynchronous preset/clear pin(s) ctrl_ddr3_inst/u_ctrl_ddr_mig/c2_u_ddr3_infrastructure/rstdiv0_sync_r1_reg_rep__7/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c2_u_ddr3_infrastructure/rstdiv0_sync_r1_reg_rep__8/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c2_u_ddr3_infrastructure/rstdiv0_sync_r1_reg_rep__9/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c2_u_ddr3_infrastructure/rstdiv0_sync_r_reg[0]/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c2_u_ddr3_infrastructure/rstdiv0_sync_r_reg[10]/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c2_u_ddr3_infrastructure/rstdiv0_sync_r_reg[11]/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c2_u_ddr3_infrastructure/rstdiv0_sync_r_reg[1]/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c2_u_ddr3_infrastructure/rstdiv0_sync_r_reg[2]/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c2_u_ddr3_infrastructure/rstdiv0_sync_r_reg[3]/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c2_u_ddr3_infrastructure/rstdiv0_sync_r_reg[4]/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c2_u_ddr3_infrastructure/rstdiv0_sync_r_reg[5]/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c2_u_ddr3_infrastructure/rstdiv0_sync_r_reg[6]/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c2_u_ddr3_infrastructure/rstdiv0_sync_r_reg[7]/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c2_u_ddr3_infrastructure/rstdiv0_sync_r_reg[8]/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c2_u_ddr3_infrastructure/rstdiv0_sync_r_reg[9]/PRE
+ (the first 15 of 53 listed). The LUT may glitch and trigger an unexpected reset, even if it is a properly timed path.
+Related violations: <none>
+
+LUTAR-1#4 Warning
+LUT drives async reset alert  
+LUT cell ctrl_ddr3_inst/u_ctrl_ddr_mig/c3_u_ddr3_infrastructure/rst_tmp_phaser_ref__0, with 2 or more inputs, drives asynchronous preset/clear pin(s) ctrl_ddr3_inst/u_ctrl_ddr_mig/c3_u_ddr3_infrastructure/rstdiv0_sync_r1_reg_rep__7/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c3_u_ddr3_infrastructure/rstdiv0_sync_r1_reg_rep__8/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c3_u_ddr3_infrastructure/rstdiv0_sync_r1_reg_rep__9/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c3_u_ddr3_infrastructure/rstdiv0_sync_r_reg[0]/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c3_u_ddr3_infrastructure/rstdiv0_sync_r_reg[10]/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c3_u_ddr3_infrastructure/rstdiv0_sync_r_reg[11]/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c3_u_ddr3_infrastructure/rstdiv0_sync_r_reg[1]/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c3_u_ddr3_infrastructure/rstdiv0_sync_r_reg[2]/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c3_u_ddr3_infrastructure/rstdiv0_sync_r_reg[3]/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c3_u_ddr3_infrastructure/rstdiv0_sync_r_reg[4]/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c3_u_ddr3_infrastructure/rstdiv0_sync_r_reg[5]/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c3_u_ddr3_infrastructure/rstdiv0_sync_r_reg[6]/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c3_u_ddr3_infrastructure/rstdiv0_sync_r_reg[7]/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c3_u_ddr3_infrastructure/rstdiv0_sync_r_reg[8]/PRE,
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c3_u_ddr3_infrastructure/rstdiv0_sync_r_reg[9]/PRE
+ (the first 15 of 53 listed). The LUT may glitch and trigger an unexpected reset, even if it is a properly timed path.
+Related violations: <none>
+
+LUTAR-1#5 Warning
+LUT drives async reset alert  
+LUT cell genlock_top_inst/genlock_inst/pfd_ins/down_n_i_3, with 2 or more inputs, drives asynchronous preset/clear pin(s) genlock_top_inst/genlock_inst/pfd_ins/down_n_reg/PRE
+genlock_top_inst/genlock_inst/pfd_ins/down_n_reg_lopt_replica/PRE. The LUT may glitch and trigger an unexpected reset, even if it is a properly timed path.
+Related violations: <none>
+
+LUTAR-1#6 Warning
+LUT drives async reset alert  
+LUT cell genlock_top_inst/genlock_inst/pfd_ins/up_n_i_2, with 2 or more inputs, drives asynchronous preset/clear pin(s) genlock_top_inst/genlock_inst/pfd_ins/up_n_reg/PRE. The LUT may glitch and trigger an unexpected reset, even if it is a properly timed path.
+Related violations: <none>
+
+TIMING-9#1 Warning
+Unknown CDC Logic  
+One or more asynchronous Clock Domain Crossing has been detected between 2 clock domains through a set_false_path or a set_clock_groups or set_max_delay -datapath_only constraint but no double-registers logic synchronizer has been found on the side of the capture clock. It is recommended to run report_cdc for a complete and detailed CDC coverage. Please consider using XPM_CDC to avoid Critical severities
+Related violations: <none>
+
+TIMING-10#1 Warning
+Missing property on synchronizer  
+One or more logic synchronizer has been detected between 2 clock domains but the synchronizer does not have the property ASYNC_REG defined on one or both registers. It is recommended to run report_cdc for a complete and detailed CDC coverage
+Related violations: <none>
+
+TIMING-18#1 Warning
+Missing input or output delay  
+An input delay is missing on ccvs_hs_i relative to the rising and/or falling clock edge(s) of mgtclk0.
+Related violations: <none>
+
+TIMING-18#2 Warning
+Missing input or output delay  
+An input delay is missing on ccvs_oe_i relative to the rising and/or falling clock edge(s) of mgtclk0.
+Related violations: <none>
+
+TIMING-18#3 Warning
+Missing input or output delay  
+An input delay is missing on ccvs_vs_i relative to the rising and/or falling clock edge(s) of mgtclk0.
+Related violations: <none>
+
+TIMING-18#4 Warning
+Missing input or output delay  
+An input delay is missing on phy_emulator_mdio relative to the rising and/or falling clock edge(s) of rmii_mdc.
+Related violations: <none>
+
+TIMING-18#5 Warning
+Missing input or output delay  
+An input delay is missing on rgmii_tx_ctl_i relative to the rising and/or falling clock edge(s) of rmii_clk.
+Related violations: <none>
+
+TIMING-18#6 Warning
+Missing input or output delay  
+An input delay is missing on rgmii_txd_i[0] relative to the rising and/or falling clock edge(s) of rmii_clk.
+Related violations: <none>
+
+TIMING-18#7 Warning
+Missing input or output delay  
+An input delay is missing on rgmii_txd_i[1] relative to the rising and/or falling clock edge(s) of rmii_clk.
+Related violations: <none>
+
+TIMING-18#8 Warning
+Missing input or output delay  
+An input delay is missing on rgmii_txd_i[2] relative to the rising and/or falling clock edge(s) of rmii_clk.
+Related violations: <none>
+
+TIMING-18#9 Warning
+Missing input or output delay  
+An input delay is missing on rgmii_txd_i[3] relative to the rising and/or falling clock edge(s) of rmii_clk.
+Related violations: <none>
+
+TIMING-18#10 Warning
+Missing input or output delay  
+An output delay is missing on phy_emulator_mdio relative to the rising and/or falling clock edge(s) of rmii_mdc.
+Related violations: <none>
+
+TIMING-24#1 Warning
+Overridden Max delay datapath only  
+An asynchronous set_clock_groups or a set_false path (see constraint position 75 in the Timing Constraints window in Vivado IDE) between clocks clk_pll_i and clk_200mhz overrides a set_max_delay -datapath_only (position 9). It is not recommended to override a set_max_delay -datapath_only constraint. Replace the set_clock_groups or set_false_path between clocks with point-to-point set_false_path constraints
+Related violations: <none>
+
+TIMING-28#1 Warning
+Auto-derived clock referenced by a timing constraint  
+The auto-derived clock clk_125_90mhz is referenced by name inside timing constraint (see constraint position 47 in the Timing Constraint window in Vivado IDE). It is recommended to reference an auto-derived clock by the pin name attached to the clock: get_clocks -of_objects [get_pins clk_gen_inst/pll_20mhz_inst/CLKOUT3]
+Related violations: <none>
+
+TIMING-28#2 Warning
+Auto-derived clock referenced by a timing constraint  
+The auto-derived clock clk_200mhz is referenced by name inside timing constraint (see constraint position 75 in the Timing Constraint window in Vivado IDE). It is recommended to reference an auto-derived clock by the pin name attached to the clock: get_clocks -of_objects [get_pins clk_gen_inst/pll_20mhz_inst/CLKOUT2]
+Related violations: <none>
+
+TIMING-28#3 Warning
+Auto-derived clock referenced by a timing constraint  
+The auto-derived clock clk_200mhz is referenced by name inside timing constraint (see constraint position 79 in the Timing Constraint window in Vivado IDE). It is recommended to reference an auto-derived clock by the pin name attached to the clock: get_clocks -of_objects [get_pins clk_gen_inst/pll_20mhz_inst/CLKOUT2]
+Related violations: <none>
+
+TIMING-28#4 Warning
+Auto-derived clock referenced by a timing constraint  
+The auto-derived clock clk_200mhz is referenced by name inside timing constraint (see constraint position 80 in the Timing Constraint window in Vivado IDE). It is recommended to reference an auto-derived clock by the pin name attached to the clock: get_clocks -of_objects [get_pins clk_gen_inst/pll_20mhz_inst/CLKOUT2]
+Related violations: <none>
+
+TIMING-28#5 Warning
+Auto-derived clock referenced by a timing constraint  
+The auto-derived clock clk_200mhz is referenced by name inside timing constraint (see constraint position 81 in the Timing Constraint window in Vivado IDE). It is recommended to reference an auto-derived clock by the pin name attached to the clock: get_clocks -of_objects [get_pins clk_gen_inst/pll_20mhz_inst/CLKOUT2]
+Related violations: <none>
+
+TIMING-28#6 Warning
+Auto-derived clock referenced by a timing constraint  
+The auto-derived clock clk_pll_i is referenced by name inside timing constraint (see constraint position 56 in the Timing Constraint window in Vivado IDE). It is recommended to reference an auto-derived clock by the pin name attached to the clock: get_clocks -of_objects [get_pins ctrl_ddr3_inst/u_ctrl_ddr_mig/c0_u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT]
+Related violations: <none>
+
+TIMING-28#7 Warning
+Auto-derived clock referenced by a timing constraint  
+The auto-derived clock clk_pll_i is referenced by name inside timing constraint (see constraint position 62 in the Timing Constraint window in Vivado IDE). It is recommended to reference an auto-derived clock by the pin name attached to the clock: get_clocks -of_objects [get_pins ctrl_ddr3_inst/u_ctrl_ddr_mig/c0_u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT]
+Related violations: <none>
+
+TIMING-28#8 Warning
+Auto-derived clock referenced by a timing constraint  
+The auto-derived clock clk_pll_i is referenced by name inside timing constraint (see constraint position 69 in the Timing Constraint window in Vivado IDE). It is recommended to reference an auto-derived clock by the pin name attached to the clock: get_clocks -of_objects [get_pins ctrl_ddr3_inst/u_ctrl_ddr_mig/c0_u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT]
+Related violations: <none>
+
+TIMING-28#9 Warning
+Auto-derived clock referenced by a timing constraint  
+The auto-derived clock clk_pll_i is referenced by name inside timing constraint (see constraint position 72 in the Timing Constraint window in Vivado IDE). It is recommended to reference an auto-derived clock by the pin name attached to the clock: get_clocks -of_objects [get_pins ctrl_ddr3_inst/u_ctrl_ddr_mig/c0_u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT]
+Related violations: <none>
+
+TIMING-28#10 Warning
+Auto-derived clock referenced by a timing constraint  
+The auto-derived clock clk_pll_i is referenced by name inside timing constraint (see constraint position 73 in the Timing Constraint window in Vivado IDE). It is recommended to reference an auto-derived clock by the pin name attached to the clock: get_clocks -of_objects [get_pins ctrl_ddr3_inst/u_ctrl_ddr_mig/c0_u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT]
+Related violations: <none>
+
+TIMING-28#11 Warning
+Auto-derived clock referenced by a timing constraint  
+The auto-derived clock clk_pll_i is referenced by name inside timing constraint (see constraint position 74 in the Timing Constraint window in Vivado IDE). It is recommended to reference an auto-derived clock by the pin name attached to the clock: get_clocks -of_objects [get_pins ctrl_ddr3_inst/u_ctrl_ddr_mig/c0_u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT]
+Related violations: <none>
+
+TIMING-28#12 Warning
+Auto-derived clock referenced by a timing constraint  
+The auto-derived clock clk_pll_i is referenced by name inside timing constraint (see constraint position 75 in the Timing Constraint window in Vivado IDE). It is recommended to reference an auto-derived clock by the pin name attached to the clock: get_clocks -of_objects [get_pins ctrl_ddr3_inst/u_ctrl_ddr_mig/c0_u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT]
+Related violations: <none>
+
+TIMING-28#13 Warning
+Auto-derived clock referenced by a timing constraint  
+The auto-derived clock clk_pll_i is referenced by name inside timing constraint (see constraint position 79 in the Timing Constraint window in Vivado IDE). It is recommended to reference an auto-derived clock by the pin name attached to the clock: get_clocks -of_objects [get_pins ctrl_ddr3_inst/u_ctrl_ddr_mig/c0_u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT]
+Related violations: <none>
+
+TIMING-28#14 Warning
+Auto-derived clock referenced by a timing constraint  
+The auto-derived clock clk_pll_i_1 is referenced by name inside timing constraint (see constraint position 56 in the Timing Constraint window in Vivado IDE). It is recommended to reference an auto-derived clock by the pin name attached to the clock: get_clocks -of_objects [get_pins ctrl_ddr3_inst/u_ctrl_ddr_mig/c1_u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT]
+Related violations: <none>
+
+TIMING-28#15 Warning
+Auto-derived clock referenced by a timing constraint  
+The auto-derived clock clk_pll_i_1 is referenced by name inside timing constraint (see constraint position 62 in the Timing Constraint window in Vivado IDE). It is recommended to reference an auto-derived clock by the pin name attached to the clock: get_clocks -of_objects [get_pins ctrl_ddr3_inst/u_ctrl_ddr_mig/c1_u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT]
+Related violations: <none>
+
+TIMING-28#16 Warning
+Auto-derived clock referenced by a timing constraint  
+The auto-derived clock clk_pll_i_1 is referenced by name inside timing constraint (see constraint position 69 in the Timing Constraint window in Vivado IDE). It is recommended to reference an auto-derived clock by the pin name attached to the clock: get_clocks -of_objects [get_pins ctrl_ddr3_inst/u_ctrl_ddr_mig/c1_u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT]
+Related violations: <none>
+
+TIMING-28#17 Warning
+Auto-derived clock referenced by a timing constraint  
+The auto-derived clock clk_pll_i_1 is referenced by name inside timing constraint (see constraint position 72 in the Timing Constraint window in Vivado IDE). It is recommended to reference an auto-derived clock by the pin name attached to the clock: get_clocks -of_objects [get_pins ctrl_ddr3_inst/u_ctrl_ddr_mig/c1_u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT]
+Related violations: <none>
+
+TIMING-28#18 Warning
+Auto-derived clock referenced by a timing constraint  
+The auto-derived clock clk_pll_i_1 is referenced by name inside timing constraint (see constraint position 73 in the Timing Constraint window in Vivado IDE). It is recommended to reference an auto-derived clock by the pin name attached to the clock: get_clocks -of_objects [get_pins ctrl_ddr3_inst/u_ctrl_ddr_mig/c1_u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT]
+Related violations: <none>
+
+TIMING-28#19 Warning
+Auto-derived clock referenced by a timing constraint  
+The auto-derived clock clk_pll_i_1 is referenced by name inside timing constraint (see constraint position 74 in the Timing Constraint window in Vivado IDE). It is recommended to reference an auto-derived clock by the pin name attached to the clock: get_clocks -of_objects [get_pins ctrl_ddr3_inst/u_ctrl_ddr_mig/c1_u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT]
+Related violations: <none>
+
+TIMING-28#20 Warning
+Auto-derived clock referenced by a timing constraint  
+The auto-derived clock clk_pll_i_1 is referenced by name inside timing constraint (see constraint position 79 in the Timing Constraint window in Vivado IDE). It is recommended to reference an auto-derived clock by the pin name attached to the clock: get_clocks -of_objects [get_pins ctrl_ddr3_inst/u_ctrl_ddr_mig/c1_u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT]
+Related violations: <none>
+
+TIMING-28#21 Warning
+Auto-derived clock referenced by a timing constraint  
+The auto-derived clock clk_pll_i_2 is referenced by name inside timing constraint (see constraint position 56 in the Timing Constraint window in Vivado IDE). It is recommended to reference an auto-derived clock by the pin name attached to the clock: get_clocks -of_objects [get_pins ctrl_ddr3_inst/u_ctrl_ddr_mig/c2_u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT]
+Related violations: <none>
+
+TIMING-28#22 Warning
+Auto-derived clock referenced by a timing constraint  
+The auto-derived clock clk_pll_i_2 is referenced by name inside timing constraint (see constraint position 62 in the Timing Constraint window in Vivado IDE). It is recommended to reference an auto-derived clock by the pin name attached to the clock: get_clocks -of_objects [get_pins ctrl_ddr3_inst/u_ctrl_ddr_mig/c2_u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT]
+Related violations: <none>
+
+TIMING-28#23 Warning
+Auto-derived clock referenced by a timing constraint  
+The auto-derived clock clk_pll_i_2 is referenced by name inside timing constraint (see constraint position 69 in the Timing Constraint window in Vivado IDE). It is recommended to reference an auto-derived clock by the pin name attached to the clock: get_clocks -of_objects [get_pins ctrl_ddr3_inst/u_ctrl_ddr_mig/c2_u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT]
+Related violations: <none>
+
+TIMING-28#24 Warning
+Auto-derived clock referenced by a timing constraint  
+The auto-derived clock clk_pll_i_2 is referenced by name inside timing constraint (see constraint position 72 in the Timing Constraint window in Vivado IDE). It is recommended to reference an auto-derived clock by the pin name attached to the clock: get_clocks -of_objects [get_pins ctrl_ddr3_inst/u_ctrl_ddr_mig/c2_u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT]
+Related violations: <none>
+
+TIMING-28#25 Warning
+Auto-derived clock referenced by a timing constraint  
+The auto-derived clock clk_pll_i_2 is referenced by name inside timing constraint (see constraint position 73 in the Timing Constraint window in Vivado IDE). It is recommended to reference an auto-derived clock by the pin name attached to the clock: get_clocks -of_objects [get_pins ctrl_ddr3_inst/u_ctrl_ddr_mig/c2_u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT]
+Related violations: <none>
+
+TIMING-28#26 Warning
+Auto-derived clock referenced by a timing constraint  
+The auto-derived clock clk_pll_i_2 is referenced by name inside timing constraint (see constraint position 74 in the Timing Constraint window in Vivado IDE). It is recommended to reference an auto-derived clock by the pin name attached to the clock: get_clocks -of_objects [get_pins ctrl_ddr3_inst/u_ctrl_ddr_mig/c2_u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT]
+Related violations: <none>
+
+TIMING-28#27 Warning
+Auto-derived clock referenced by a timing constraint  
+The auto-derived clock clk_pll_i_2 is referenced by name inside timing constraint (see constraint position 79 in the Timing Constraint window in Vivado IDE). It is recommended to reference an auto-derived clock by the pin name attached to the clock: get_clocks -of_objects [get_pins ctrl_ddr3_inst/u_ctrl_ddr_mig/c2_u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT]
+Related violations: <none>
+
+TIMING-28#28 Warning
+Auto-derived clock referenced by a timing constraint  
+The auto-derived clock clk_pll_i_3 is referenced by name inside timing constraint (see constraint position 56 in the Timing Constraint window in Vivado IDE). It is recommended to reference an auto-derived clock by the pin name attached to the clock: get_clocks -of_objects [get_pins ctrl_ddr3_inst/u_ctrl_ddr_mig/c3_u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT]
+Related violations: <none>
+
+TIMING-28#29 Warning
+Auto-derived clock referenced by a timing constraint  
+The auto-derived clock clk_pll_i_3 is referenced by name inside timing constraint (see constraint position 62 in the Timing Constraint window in Vivado IDE). It is recommended to reference an auto-derived clock by the pin name attached to the clock: get_clocks -of_objects [get_pins ctrl_ddr3_inst/u_ctrl_ddr_mig/c3_u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT]
+Related violations: <none>
+
+TIMING-28#30 Warning
+Auto-derived clock referenced by a timing constraint  
+The auto-derived clock clk_pll_i_3 is referenced by name inside timing constraint (see constraint position 69 in the Timing Constraint window in Vivado IDE). It is recommended to reference an auto-derived clock by the pin name attached to the clock: get_clocks -of_objects [get_pins ctrl_ddr3_inst/u_ctrl_ddr_mig/c3_u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT]
+Related violations: <none>
+
+TIMING-28#31 Warning
+Auto-derived clock referenced by a timing constraint  
+The auto-derived clock clk_pll_i_3 is referenced by name inside timing constraint (see constraint position 72 in the Timing Constraint window in Vivado IDE). It is recommended to reference an auto-derived clock by the pin name attached to the clock: get_clocks -of_objects [get_pins ctrl_ddr3_inst/u_ctrl_ddr_mig/c3_u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT]
+Related violations: <none>
+
+TIMING-28#32 Warning
+Auto-derived clock referenced by a timing constraint  
+The auto-derived clock clk_pll_i_3 is referenced by name inside timing constraint (see constraint position 73 in the Timing Constraint window in Vivado IDE). It is recommended to reference an auto-derived clock by the pin name attached to the clock: get_clocks -of_objects [get_pins ctrl_ddr3_inst/u_ctrl_ddr_mig/c3_u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT]
+Related violations: <none>
+
+TIMING-28#33 Warning
+Auto-derived clock referenced by a timing constraint  
+The auto-derived clock clk_pll_i_3 is referenced by name inside timing constraint (see constraint position 74 in the Timing Constraint window in Vivado IDE). It is recommended to reference an auto-derived clock by the pin name attached to the clock: get_clocks -of_objects [get_pins ctrl_ddr3_inst/u_ctrl_ddr_mig/c3_u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT]
+Related violations: <none>
+
+TIMING-28#34 Warning
+Auto-derived clock referenced by a timing constraint  
+The auto-derived clock clk_pll_i_3 is referenced by name inside timing constraint (see constraint position 79 in the Timing Constraint window in Vivado IDE). It is recommended to reference an auto-derived clock by the pin name attached to the clock: get_clocks -of_objects [get_pins ctrl_ddr3_inst/u_ctrl_ddr_mig/c3_u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKFBOUT]
+Related violations: <none>
+
+TIMING-28#35 Warning
+Auto-derived clock referenced by a timing constraint  
+The auto-derived clock clkout1 is referenced by name inside timing constraint (see constraint position 57 in the Timing Constraint window in Vivado IDE). It is recommended to reference an auto-derived clock by the pin name attached to the clock: get_clocks -of_objects [get_pins tx_usrclk_inst/plle2_adv_inst/CLKOUT1]
+Related violations: <none>
+
+TIMING-28#36 Warning
+Auto-derived clock referenced by a timing constraint  
+The auto-derived clock clkout1 is referenced by name inside timing constraint (see constraint position 65 in the Timing Constraint window in Vivado IDE). It is recommended to reference an auto-derived clock by the pin name attached to the clock: get_clocks -of_objects [get_pins tx_usrclk_inst/plle2_adv_inst/CLKOUT1]
+Related violations: <none>
+
+TIMING-28#37 Warning
+Auto-derived clock referenced by a timing constraint  
+The auto-derived clock clkout1 is referenced by name inside timing constraint (see constraint position 76 in the Timing Constraint window in Vivado IDE). It is recommended to reference an auto-derived clock by the pin name attached to the clock: get_clocks -of_objects [get_pins tx_usrclk_inst/plle2_adv_inst/CLKOUT1]
+Related violations: <none>
+
+TIMING-28#38 Warning
+Auto-derived clock referenced by a timing constraint  
+The auto-derived clock clkout2 is referenced by name inside timing constraint (see constraint position 42 in the Timing Constraint window in Vivado IDE). It is recommended to reference an auto-derived clock by the pin name attached to the clock: get_clocks -of_objects [get_pins tx_usrclk_inst/plle2_adv_inst/CLKOUT2]
+Related violations: <none>
+
+TIMING-28#39 Warning
+Auto-derived clock referenced by a timing constraint  
+The auto-derived clock clkout2 is referenced by name inside timing constraint (see constraint position 43 in the Timing Constraint window in Vivado IDE). It is recommended to reference an auto-derived clock by the pin name attached to the clock: get_clocks -of_objects [get_pins tx_usrclk_inst/plle2_adv_inst/CLKOUT2]
+Related violations: <none>
+
+TIMING-28#40 Warning
+Auto-derived clock referenced by a timing constraint  
+The auto-derived clock clkout2 is referenced by name inside timing constraint (see constraint position 52 in the Timing Constraint window in Vivado IDE). It is recommended to reference an auto-derived clock by the pin name attached to the clock: get_clocks -of_objects [get_pins tx_usrclk_inst/plle2_adv_inst/CLKOUT2]
+Related violations: <none>
+
+TIMING-28#41 Warning
+Auto-derived clock referenced by a timing constraint  
+The auto-derived clock clkout2 is referenced by name inside timing constraint (see constraint position 58 in the Timing Constraint window in Vivado IDE). It is recommended to reference an auto-derived clock by the pin name attached to the clock: get_clocks -of_objects [get_pins tx_usrclk_inst/plle2_adv_inst/CLKOUT2]
+Related violations: <none>
+
+TIMING-28#42 Warning
+Auto-derived clock referenced by a timing constraint  
+The auto-derived clock clkout2 is referenced by name inside timing constraint (see constraint position 61 in the Timing Constraint window in Vivado IDE). It is recommended to reference an auto-derived clock by the pin name attached to the clock: get_clocks -of_objects [get_pins tx_usrclk_inst/plle2_adv_inst/CLKOUT2]
+Related violations: <none>
+
+TIMING-28#43 Warning
+Auto-derived clock referenced by a timing constraint  
+The auto-derived clock clkout2 is referenced by name inside timing constraint (see constraint position 62 in the Timing Constraint window in Vivado IDE). It is recommended to reference an auto-derived clock by the pin name attached to the clock: get_clocks -of_objects [get_pins tx_usrclk_inst/plle2_adv_inst/CLKOUT2]
+Related violations: <none>
+
+TIMING-28#44 Warning
+Auto-derived clock referenced by a timing constraint  
+The auto-derived clock clkout2 is referenced by name inside timing constraint (see constraint position 63 in the Timing Constraint window in Vivado IDE). It is recommended to reference an auto-derived clock by the pin name attached to the clock: get_clocks -of_objects [get_pins tx_usrclk_inst/plle2_adv_inst/CLKOUT2]
+Related violations: <none>
+
+TIMING-28#45 Warning
+Auto-derived clock referenced by a timing constraint  
+The auto-derived clock clkout2 is referenced by name inside timing constraint (see constraint position 64 in the Timing Constraint window in Vivado IDE). It is recommended to reference an auto-derived clock by the pin name attached to the clock: get_clocks -of_objects [get_pins tx_usrclk_inst/plle2_adv_inst/CLKOUT2]
+Related violations: <none>
+
+TIMING-28#46 Warning
+Auto-derived clock referenced by a timing constraint  
+The auto-derived clock clkout2 is referenced by name inside timing constraint (see constraint position 65 in the Timing Constraint window in Vivado IDE). It is recommended to reference an auto-derived clock by the pin name attached to the clock: get_clocks -of_objects [get_pins tx_usrclk_inst/plle2_adv_inst/CLKOUT2]
+Related violations: <none>
+
+TIMING-28#47 Warning
+Auto-derived clock referenced by a timing constraint  
+The auto-derived clock clkout2 is referenced by name inside timing constraint (see constraint position 70 in the Timing Constraint window in Vivado IDE). It is recommended to reference an auto-derived clock by the pin name attached to the clock: get_clocks -of_objects [get_pins tx_usrclk_inst/plle2_adv_inst/CLKOUT2]
+Related violations: <none>
+
+TIMING-28#48 Warning
+Auto-derived clock referenced by a timing constraint  
+The auto-derived clock clkout2 is referenced by name inside timing constraint (see constraint position 72 in the Timing Constraint window in Vivado IDE). It is recommended to reference an auto-derived clock by the pin name attached to the clock: get_clocks -of_objects [get_pins tx_usrclk_inst/plle2_adv_inst/CLKOUT2]
+Related violations: <none>
+
+TIMING-28#49 Warning
+Auto-derived clock referenced by a timing constraint  
+The auto-derived clock mmcm_ps_clk_bufg_in is referenced by name inside timing constraint (see constraint position 80 in the Timing Constraint window in Vivado IDE). It is recommended to reference an auto-derived clock by the pin name attached to the clock: get_clocks -of_objects [get_pins ctrl_ddr3_inst/u_ctrl_ddr_mig/c0_u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKOUT0]
+Related violations: <none>
+
+TIMING-28#50 Warning
+Auto-derived clock referenced by a timing constraint  
+The auto-derived clock mmcm_ps_clk_bufg_in_1 is referenced by name inside timing constraint (see constraint position 80 in the Timing Constraint window in Vivado IDE). It is recommended to reference an auto-derived clock by the pin name attached to the clock: get_clocks -of_objects [get_pins ctrl_ddr3_inst/u_ctrl_ddr_mig/c1_u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKOUT0]
+Related violations: <none>
+
+TIMING-28#51 Warning
+Auto-derived clock referenced by a timing constraint  
+The auto-derived clock mmcm_ps_clk_bufg_in_2 is referenced by name inside timing constraint (see constraint position 80 in the Timing Constraint window in Vivado IDE). It is recommended to reference an auto-derived clock by the pin name attached to the clock: get_clocks -of_objects [get_pins ctrl_ddr3_inst/u_ctrl_ddr_mig/c2_u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKOUT0]
+Related violations: <none>
+
+TIMING-28#52 Warning
+Auto-derived clock referenced by a timing constraint  
+The auto-derived clock mmcm_ps_clk_bufg_in_3 is referenced by name inside timing constraint (see constraint position 80 in the Timing Constraint window in Vivado IDE). It is recommended to reference an auto-derived clock by the pin name attached to the clock: get_clocks -of_objects [get_pins ctrl_ddr3_inst/u_ctrl_ddr_mig/c3_u_ddr3_infrastructure/gen_mmcm.mmcm_i/CLKOUT0]
+Related violations: <none>
+
+TIMING-47#1 Warning
+False path, asynchronous clock group or max delay datapath only constraint between synchronous clocks  
+A False Path timing constraint is set between synchronous clocks clk_125mhz and clk_125_90mhz (see constraint position 47 in the Timing Constraint window in Vivado IDE). Masking entire synchronous clock domains via  set_false_path, set_clock_groups or set_max_delay -datapath_only may result in failure in hardware.
+Related violations: <none>
+
+TIMING-47#2 Warning
+False path, asynchronous clock group or max delay datapath only constraint between synchronous clocks  
+A False Path timing constraint is set between synchronous clocks clk_125mhz and clk_50mhz (see constraint position 44 in the Timing Constraint window in Vivado IDE). Masking entire synchronous clock domains via  set_false_path, set_clock_groups or set_max_delay -datapath_only may result in failure in hardware.
+Related violations: <none>
+
+TIMING-47#3 Warning
+False path, asynchronous clock group or max delay datapath only constraint between synchronous clocks  
+A False Path timing constraint is set between synchronous clocks clk_135mhz and clk_50mhz (see constraint position 50 in the Timing Constraint window in Vivado IDE). Masking entire synchronous clock domains via  set_false_path, set_clock_groups or set_max_delay -datapath_only may result in failure in hardware.
+Related violations: <none>
+
+TIMING-47#4 Warning
+False path, asynchronous clock group or max delay datapath only constraint between synchronous clocks  
+A False Path timing constraint is set between synchronous clocks clk_200mhz and clk_125mhz (see constraint position 81 in the Timing Constraint window in Vivado IDE). Masking entire synchronous clock domains via  set_false_path, set_clock_groups or set_max_delay -datapath_only may result in failure in hardware.
+Related violations: <none>
+
+TIMING-47#5 Warning
+False path, asynchronous clock group or max delay datapath only constraint between synchronous clocks  
+A False Path timing constraint is set between synchronous clocks clk_200mhz and clk_pll_i (see constraint position 79 in the Timing Constraint window in Vivado IDE). Masking entire synchronous clock domains via  set_false_path, set_clock_groups or set_max_delay -datapath_only may result in failure in hardware.
+Related violations: <none>
+
+TIMING-47#6 Warning
+False path, asynchronous clock group or max delay datapath only constraint between synchronous clocks  
+A False Path timing constraint is set between synchronous clocks clk_200mhz and clk_pll_i_1 (see constraint position 79 in the Timing Constraint window in Vivado IDE). Masking entire synchronous clock domains via  set_false_path, set_clock_groups or set_max_delay -datapath_only may result in failure in hardware.
+Related violations: <none>
+
+TIMING-47#7 Warning
+False path, asynchronous clock group or max delay datapath only constraint between synchronous clocks  
+A False Path timing constraint is set between synchronous clocks clk_200mhz and clk_pll_i_2 (see constraint position 79 in the Timing Constraint window in Vivado IDE). Masking entire synchronous clock domains via  set_false_path, set_clock_groups or set_max_delay -datapath_only may result in failure in hardware.
+Related violations: <none>
+
+TIMING-47#8 Warning
+False path, asynchronous clock group or max delay datapath only constraint between synchronous clocks  
+A False Path timing constraint is set between synchronous clocks clk_200mhz and clk_pll_i_3 (see constraint position 79 in the Timing Constraint window in Vivado IDE). Masking entire synchronous clock domains via  set_false_path, set_clock_groups or set_max_delay -datapath_only may result in failure in hardware.
+Related violations: <none>
+
+TIMING-47#9 Warning
+False path, asynchronous clock group or max delay datapath only constraint between synchronous clocks  
+A False Path timing constraint is set between synchronous clocks clk_200mhz and mmcm_ps_clk_bufg_in (see constraint position 80 in the Timing Constraint window in Vivado IDE). Masking entire synchronous clock domains via  set_false_path, set_clock_groups or set_max_delay -datapath_only may result in failure in hardware.
+Related violations: <none>
+
+TIMING-47#10 Warning
+False path, asynchronous clock group or max delay datapath only constraint between synchronous clocks  
+A False Path timing constraint is set between synchronous clocks clk_200mhz and mmcm_ps_clk_bufg_in_1 (see constraint position 80 in the Timing Constraint window in Vivado IDE). Masking entire synchronous clock domains via  set_false_path, set_clock_groups or set_max_delay -datapath_only may result in failure in hardware.
+Related violations: <none>
+
+TIMING-47#11 Warning
+False path, asynchronous clock group or max delay datapath only constraint between synchronous clocks  
+A False Path timing constraint is set between synchronous clocks clk_200mhz and mmcm_ps_clk_bufg_in_2 (see constraint position 80 in the Timing Constraint window in Vivado IDE). Masking entire synchronous clock domains via  set_false_path, set_clock_groups or set_max_delay -datapath_only may result in failure in hardware.
+Related violations: <none>
+
+TIMING-47#12 Warning
+False path, asynchronous clock group or max delay datapath only constraint between synchronous clocks  
+A False Path timing constraint is set between synchronous clocks clk_200mhz and mmcm_ps_clk_bufg_in_3 (see constraint position 80 in the Timing Constraint window in Vivado IDE). Masking entire synchronous clock domains via  set_false_path, set_clock_groups or set_max_delay -datapath_only may result in failure in hardware.
+Related violations: <none>
+
+TIMING-47#13 Warning
+False path, asynchronous clock group or max delay datapath only constraint between synchronous clocks  
+A False Path timing constraint is set between synchronous clocks clk_50mhz and clk_125mhz (see constraint position 53 in the Timing Constraint window in Vivado IDE). Masking entire synchronous clock domains via  set_false_path, set_clock_groups or set_max_delay -datapath_only may result in failure in hardware.
+Related violations: <none>
+
+TIMING-47#14 Warning
+False path, asynchronous clock group or max delay datapath only constraint between synchronous clocks  
+A False Path timing constraint is set between synchronous clocks clk_50mhz and clk_135mhz (see constraint position 55 in the Timing Constraint window in Vivado IDE). Masking entire synchronous clock domains via  set_false_path, set_clock_groups or set_max_delay -datapath_only may result in failure in hardware.
+Related violations: <none>
+
+TIMING-47#15 Warning
+False path, asynchronous clock group or max delay datapath only constraint between synchronous clocks  
+A False Path timing constraint is set between synchronous clocks clk_50mhz and clk_pll_i (see constraint position 56 in the Timing Constraint window in Vivado IDE). Masking entire synchronous clock domains via  set_false_path, set_clock_groups or set_max_delay -datapath_only may result in failure in hardware.
+Related violations: <none>
+
+TIMING-47#16 Warning
+False path, asynchronous clock group or max delay datapath only constraint between synchronous clocks  
+A False Path timing constraint is set between synchronous clocks clk_50mhz and clk_pll_i_1 (see constraint position 56 in the Timing Constraint window in Vivado IDE). Masking entire synchronous clock domains via  set_false_path, set_clock_groups or set_max_delay -datapath_only may result in failure in hardware.
+Related violations: <none>
+
+TIMING-47#17 Warning
+False path, asynchronous clock group or max delay datapath only constraint between synchronous clocks  
+A False Path timing constraint is set between synchronous clocks clk_50mhz and clk_pll_i_2 (see constraint position 56 in the Timing Constraint window in Vivado IDE). Masking entire synchronous clock domains via  set_false_path, set_clock_groups or set_max_delay -datapath_only may result in failure in hardware.
+Related violations: <none>
+
+TIMING-47#18 Warning
+False path, asynchronous clock group or max delay datapath only constraint between synchronous clocks  
+A False Path timing constraint is set between synchronous clocks clk_50mhz and clk_pll_i_3 (see constraint position 56 in the Timing Constraint window in Vivado IDE). Masking entire synchronous clock domains via  set_false_path, set_clock_groups or set_max_delay -datapath_only may result in failure in hardware.
+Related violations: <none>
+
+TIMING-47#19 Warning
+False path, asynchronous clock group or max delay datapath only constraint between synchronous clocks  
+A False Path timing constraint is set between synchronous clocks clk_pll_i and clk_200mhz (see constraint position 75 in the Timing Constraint window in Vivado IDE). Masking entire synchronous clock domains via  set_false_path, set_clock_groups or set_max_delay -datapath_only may result in failure in hardware.
+Related violations: <none>
+
+TIMING-47#20 Warning
+False path, asynchronous clock group or max delay datapath only constraint between synchronous clocks  
+A False Path timing constraint is set between synchronous clocks clk_pll_i and clk_50mhz (see constraint position 73 in the Timing Constraint window in Vivado IDE). Masking entire synchronous clock domains via  set_false_path, set_clock_groups or set_max_delay -datapath_only may result in failure in hardware.
+Related violations: <none>
+
+TIMING-47#21 Warning
+False path, asynchronous clock group or max delay datapath only constraint between synchronous clocks  
+A False Path timing constraint is set between synchronous clocks clk_pll_i and clk_pll_i_1 (see constraint position 74 in the Timing Constraint window in Vivado IDE). Masking entire synchronous clock domains via  set_false_path, set_clock_groups or set_max_delay -datapath_only may result in failure in hardware.
+Related violations: <none>
+
+TIMING-47#22 Warning
+False path, asynchronous clock group or max delay datapath only constraint between synchronous clocks  
+A False Path timing constraint is set between synchronous clocks clk_pll_i and clk_pll_i_2 (see constraint position 74 in the Timing Constraint window in Vivado IDE). Masking entire synchronous clock domains via  set_false_path, set_clock_groups or set_max_delay -datapath_only may result in failure in hardware.
+Related violations: <none>
+
+TIMING-47#23 Warning
+False path, asynchronous clock group or max delay datapath only constraint between synchronous clocks  
+A False Path timing constraint is set between synchronous clocks clk_pll_i and clk_pll_i_3 (see constraint position 74 in the Timing Constraint window in Vivado IDE). Masking entire synchronous clock domains via  set_false_path, set_clock_groups or set_max_delay -datapath_only may result in failure in hardware.
+Related violations: <none>
+
+TIMING-47#24 Warning
+False path, asynchronous clock group or max delay datapath only constraint between synchronous clocks  
+A False Path timing constraint is set between synchronous clocks clk_pll_i_1 and clk_50mhz (see constraint position 73 in the Timing Constraint window in Vivado IDE). Masking entire synchronous clock domains via  set_false_path, set_clock_groups or set_max_delay -datapath_only may result in failure in hardware.
+Related violations: <none>
+
+TIMING-47#25 Warning
+False path, asynchronous clock group or max delay datapath only constraint between synchronous clocks  
+A False Path timing constraint is set between synchronous clocks clk_pll_i_2 and clk_50mhz (see constraint position 73 in the Timing Constraint window in Vivado IDE). Masking entire synchronous clock domains via  set_false_path, set_clock_groups or set_max_delay -datapath_only may result in failure in hardware.
+Related violations: <none>
+
+TIMING-47#26 Warning
+False path, asynchronous clock group or max delay datapath only constraint between synchronous clocks  
+A False Path timing constraint is set between synchronous clocks clk_pll_i_3 and clk_50mhz (see constraint position 73 in the Timing Constraint window in Vivado IDE). Masking entire synchronous clock domains via  set_false_path, set_clock_groups or set_max_delay -datapath_only may result in failure in hardware.
+Related violations: <none>
+
+TIMING-47#27 Warning
+False path, asynchronous clock group or max delay datapath only constraint between synchronous clocks  
+A False Path timing constraint is set between synchronous clocks rx0_outclk and nidru_clk0 (see constraint position 71 in the Timing Constraint window in Vivado IDE). Masking entire synchronous clock domains via  set_false_path, set_clock_groups or set_max_delay -datapath_only may result in failure in hardware.
+Related violations: <none>
+
+TIMING-47#28 Warning
+False path, asynchronous clock group or max delay datapath only constraint between synchronous clocks  
+A False Path timing constraint is set between synchronous clocks rx1_outclk and nidru_clk1 (see constraint position 71 in the Timing Constraint window in Vivado IDE). Masking entire synchronous clock domains via  set_false_path, set_clock_groups or set_max_delay -datapath_only may result in failure in hardware.
+Related violations: <none>
+
+TIMING-47#29 Warning
+False path, asynchronous clock group or max delay datapath only constraint between synchronous clocks  
+A False Path timing constraint is set between synchronous clocks rx2_outclk and nidru_clk2 (see constraint position 71 in the Timing Constraint window in Vivado IDE). Masking entire synchronous clock domains via  set_false_path, set_clock_groups or set_max_delay -datapath_only may result in failure in hardware.
+Related violations: <none>
+
+TIMING-47#30 Warning
+False path, asynchronous clock group or max delay datapath only constraint between synchronous clocks  
+A False Path timing constraint is set between synchronous clocks rx3_outclk and nidru_clk3 (see constraint position 71 in the Timing Constraint window in Vivado IDE). Masking entire synchronous clock domains via  set_false_path, set_clock_groups or set_max_delay -datapath_only may result in failure in hardware.
+Related violations: <none>
+
+ULMTCS-2#1 Warning
+Control Sets use limits require reduction  
+This design uses 5456 control sets (vs. available limit of 25350, determined by 1 control set per CLB). This exceeds the control set use guideline of 15 percent. This is at a level where reduction is REQUIRED (see UG949). Use report_control_sets to get more details.
+Related violations: <none>
+
+XDCB-5#1 Warning
+Runtime inefficient way to find pin objects  
+The option '-source : [get_pins -hier -filter {name=~*uhdsdi_gen[0].*GTXE2*/RXOUTCLK}]' of constraint 'create_generated_clock' uses inefficient query to find pin objects (see constraint position '26' in the Timing Constraint window in Vivado IDE). To reduce runtime, it is recommended to get the pins through the cell objects. Please refer to Using Constraints Guide (Constraints Efficiency). An example of optimal query is: get_pins -filter {REF_PIN_NAME=~yy*} -of_objects [get_cells -hierarchical xx*].
+Current XDC: C:/Users/Arturo/Documents/fpga/usw2000c01_test_ia/user_files/constrs/usw2000_timing.xdc (Line: 39)
+Related violations: <none>
+
+XDCB-5#2 Warning
+Runtime inefficient way to find pin objects  
+The option '-source : [get_pins -hier -filter {name=~*uhdsdi_gen[1].*GTXE2*/RXOUTCLK}]' of constraint 'create_generated_clock' uses inefficient query to find pin objects (see constraint position '27' in the Timing Constraint window in Vivado IDE). To reduce runtime, it is recommended to get the pins through the cell objects. Please refer to Using Constraints Guide (Constraints Efficiency). An example of optimal query is: get_pins -filter {REF_PIN_NAME=~yy*} -of_objects [get_cells -hierarchical xx*].
+Current XDC: C:/Users/Arturo/Documents/fpga/usw2000c01_test_ia/user_files/constrs/usw2000_timing.xdc (Line: 40)
+Related violations: <none>
+
+XDCB-5#3 Warning
+Runtime inefficient way to find pin objects  
+The option '-source : [get_pins -hier -filter {name=~*uhdsdi_gen[2].*GTXE2*/RXOUTCLK}]' of constraint 'create_generated_clock' uses inefficient query to find pin objects (see constraint position '28' in the Timing Constraint window in Vivado IDE). To reduce runtime, it is recommended to get the pins through the cell objects. Please refer to Using Constraints Guide (Constraints Efficiency). An example of optimal query is: get_pins -filter {REF_PIN_NAME=~yy*} -of_objects [get_cells -hierarchical xx*].
+Current XDC: C:/Users/Arturo/Documents/fpga/usw2000c01_test_ia/user_files/constrs/usw2000_timing.xdc (Line: 41)
+Related violations: <none>
+
+XDCB-5#4 Warning
+Runtime inefficient way to find pin objects  
+The option '-source : [get_pins -hier -filter {name=~*uhdsdi_gen[3].*GTXE2*/RXOUTCLK}]' of constraint 'create_generated_clock' uses inefficient query to find pin objects (see constraint position '29' in the Timing Constraint window in Vivado IDE). To reduce runtime, it is recommended to get the pins through the cell objects. Please refer to Using Constraints Guide (Constraints Efficiency). An example of optimal query is: get_pins -filter {REF_PIN_NAME=~yy*} -of_objects [get_cells -hierarchical xx*].
+Current XDC: C:/Users/Arturo/Documents/fpga/usw2000c01_test_ia/user_files/constrs/usw2000_timing.xdc (Line: 42)
+Related violations: <none>
+
+XDCB-5#5 Warning
+Runtime inefficient way to find pin objects  
+The option '-to : [get_pins -hier -include_replicated_objects -filter {NAME =~ *temp_mon_enabled.u_tempmon/device_temp_sync_r1_reg[*]/D}]' of constraint 'set_max_delay' uses inefficient query to find pin objects (see constraint position '6' in the Timing Constraint window in Vivado IDE). To reduce runtime, it is recommended to get the pins through the cell objects. Please refer to Using Constraints Guide (Constraints Efficiency). An example of optimal query is: get_pins -filter {REF_PIN_NAME=~yy*} -of_objects [get_cells -hierarchical xx*].
+Current XDC: C:/Users/Arturo/Documents/fpga/usw2000c01_test_ia/user_files/cores/ctrl_ddr/ctrl_ddr/user_design/constraints/ctrl_ddr.xdc (Line: 377)
+Related violations: <none>
+
+XDCB-5#6 Warning
+Runtime inefficient way to find pin objects  
+The option 'objects : [get_pins -hier -filter name=~*MGTCLKIN1*/ODIV2]' of constraint 'create_generated_clock' uses inefficient query to find pin objects (see constraint position '30' in the Timing Constraint window in Vivado IDE). To reduce runtime, it is recommended to get the pins through the cell objects. Please refer to Using Constraints Guide (Constraints Efficiency). An example of optimal query is: get_pins -filter {REF_PIN_NAME=~yy*} -of_objects [get_cells -hierarchical xx*].
+Current XDC: C:/Users/Arturo/Documents/fpga/usw2000c01_test_ia/user_files/constrs/usw2000_timing.xdc (Line: 43)
+Related violations: <none>
+
+XDCB-5#7 Warning
+Runtime inefficient way to find pin objects  
+The option 'objects : [get_pins -hier -filter {name=~*uhdsdi_gen[0].**NIDRU_INST/CLK}]' of constraint 'create_generated_clock' uses inefficient query to find pin objects (see constraint position '26' in the Timing Constraint window in Vivado IDE). To reduce runtime, it is recommended to get the pins through the cell objects. Please refer to Using Constraints Guide (Constraints Efficiency). An example of optimal query is: get_pins -filter {REF_PIN_NAME=~yy*} -of_objects [get_cells -hierarchical xx*].
+Current XDC: C:/Users/Arturo/Documents/fpga/usw2000c01_test_ia/user_files/constrs/usw2000_timing.xdc (Line: 39)
+Related violations: <none>
+
+XDCB-5#8 Warning
+Runtime inefficient way to find pin objects  
+The option 'objects : [get_pins -hier -filter {name=~*uhdsdi_gen[0].*GTXE2*/RXOUTCLK}]' of constraint 'create_clock' uses inefficient query to find pin objects (see constraint position '14' in the Timing Constraint window in Vivado IDE). To reduce runtime, it is recommended to get the pins through the cell objects. Please refer to Using Constraints Guide (Constraints Efficiency). An example of optimal query is: get_pins -filter {REF_PIN_NAME=~yy*} -of_objects [get_cells -hierarchical xx*].
+Current XDC: C:/Users/Arturo/Documents/fpga/usw2000c01_test_ia/user_files/constrs/usw2000_timing.xdc (Line: 17)
+Related violations: <none>
+
+XDCB-5#9 Warning
+Runtime inefficient way to find pin objects  
+The option 'objects : [get_pins -hier -filter {name=~*uhdsdi_gen[0].*GTXE2*/TXOUTCLK}]' of constraint 'create_clock' uses inefficient query to find pin objects (see constraint position '13' in the Timing Constraint window in Vivado IDE). To reduce runtime, it is recommended to get the pins through the cell objects. Please refer to Using Constraints Guide (Constraints Efficiency). An example of optimal query is: get_pins -filter {REF_PIN_NAME=~yy*} -of_objects [get_cells -hierarchical xx*].
+Current XDC: C:/Users/Arturo/Documents/fpga/usw2000c01_test_ia/user_files/constrs/usw2000_timing.xdc (Line: 16)
+Related violations: <none>
+
+XDCB-5#10 Warning
+Runtime inefficient way to find pin objects  
+The option 'objects : [get_pins -hier -filter {name=~*uhdsdi_gen[1].**NIDRU_INST/CLK}]' of constraint 'create_generated_clock' uses inefficient query to find pin objects (see constraint position '27' in the Timing Constraint window in Vivado IDE). To reduce runtime, it is recommended to get the pins through the cell objects. Please refer to Using Constraints Guide (Constraints Efficiency). An example of optimal query is: get_pins -filter {REF_PIN_NAME=~yy*} -of_objects [get_cells -hierarchical xx*].
+Current XDC: C:/Users/Arturo/Documents/fpga/usw2000c01_test_ia/user_files/constrs/usw2000_timing.xdc (Line: 40)
+Related violations: <none>
+
+XDCB-5#11 Warning
+Runtime inefficient way to find pin objects  
+The option 'objects : [get_pins -hier -filter {name=~*uhdsdi_gen[1].*GTXE2*/RXOUTCLK}]' of constraint 'create_clock' uses inefficient query to find pin objects (see constraint position '15' in the Timing Constraint window in Vivado IDE). To reduce runtime, it is recommended to get the pins through the cell objects. Please refer to Using Constraints Guide (Constraints Efficiency). An example of optimal query is: get_pins -filter {REF_PIN_NAME=~yy*} -of_objects [get_cells -hierarchical xx*].
+Current XDC: C:/Users/Arturo/Documents/fpga/usw2000c01_test_ia/user_files/constrs/usw2000_timing.xdc (Line: 18)
+Related violations: <none>
+
+XDCB-5#12 Warning
+Runtime inefficient way to find pin objects  
+The option 'objects : [get_pins -hier -filter {name=~*uhdsdi_gen[2].**NIDRU_INST/CLK}]' of constraint 'create_generated_clock' uses inefficient query to find pin objects (see constraint position '28' in the Timing Constraint window in Vivado IDE). To reduce runtime, it is recommended to get the pins through the cell objects. Please refer to Using Constraints Guide (Constraints Efficiency). An example of optimal query is: get_pins -filter {REF_PIN_NAME=~yy*} -of_objects [get_cells -hierarchical xx*].
+Current XDC: C:/Users/Arturo/Documents/fpga/usw2000c01_test_ia/user_files/constrs/usw2000_timing.xdc (Line: 41)
+Related violations: <none>
+
+XDCB-5#13 Warning
+Runtime inefficient way to find pin objects  
+The option 'objects : [get_pins -hier -filter {name=~*uhdsdi_gen[2].*GTXE2*/RXOUTCLK}]' of constraint 'create_clock' uses inefficient query to find pin objects (see constraint position '16' in the Timing Constraint window in Vivado IDE). To reduce runtime, it is recommended to get the pins through the cell objects. Please refer to Using Constraints Guide (Constraints Efficiency). An example of optimal query is: get_pins -filter {REF_PIN_NAME=~yy*} -of_objects [get_cells -hierarchical xx*].
+Current XDC: C:/Users/Arturo/Documents/fpga/usw2000c01_test_ia/user_files/constrs/usw2000_timing.xdc (Line: 19)
+Related violations: <none>
+
+XDCB-5#14 Warning
+Runtime inefficient way to find pin objects  
+The option 'objects : [get_pins -hier -filter {name=~*uhdsdi_gen[3].**NIDRU_INST/CLK}]' of constraint 'create_generated_clock' uses inefficient query to find pin objects (see constraint position '29' in the Timing Constraint window in Vivado IDE). To reduce runtime, it is recommended to get the pins through the cell objects. Please refer to Using Constraints Guide (Constraints Efficiency). An example of optimal query is: get_pins -filter {REF_PIN_NAME=~yy*} -of_objects [get_cells -hierarchical xx*].
+Current XDC: C:/Users/Arturo/Documents/fpga/usw2000c01_test_ia/user_files/constrs/usw2000_timing.xdc (Line: 42)
+Related violations: <none>
+
+XDCB-5#15 Warning
+Runtime inefficient way to find pin objects  
+The option 'objects : [get_pins -hier -filter {name=~*uhdsdi_gen[3].*GTXE2*/RXOUTCLK}]' of constraint 'create_clock' uses inefficient query to find pin objects (see constraint position '17' in the Timing Constraint window in Vivado IDE). To reduce runtime, it is recommended to get the pins through the cell objects. Please refer to Using Constraints Guide (Constraints Efficiency). An example of optimal query is: get_pins -filter {REF_PIN_NAME=~yy*} -of_objects [get_cells -hierarchical xx*].
+Current XDC: C:/Users/Arturo/Documents/fpga/usw2000c01_test_ia/user_files/constrs/usw2000_timing.xdc (Line: 20)
+Related violations: <none>
+
+XDCC-4#1 Warning
+User Clock constraint overwritten with the same name  
+A new clock constraint create_clock overrides a previous user clock constraint with the same name.
+New: create_clock -period 37.037 -name clk_27mhz -waveform {0.000 18.519} [get_ports clk_27mhz_i] (Source: C:/Users/Arturo/Documents/fpga/usw2000c01_test_ia/user_files/constrs/usw2000_timing.xdc (Line: 15))
+Previous: create_clock -period 37.037 -name clk_27mhz -waveform {0.000 18.519} [get_ports clk_27mhz_i] (Source: C:/Users/Arturo/Documents/fpga/usw2000c01_test_ia/user_files/constrs/usw2000_timing.xdc (Line: 13))
+Related violations: <none>
+
+XDCC-8#1 Warning
+User Clock constraint overwritten on the same source  
+A new clock constraint create_clock overrides a previous user clock constraint defined on the same source.
+New: create_clock -period 37.037 -name clk_27mhz -waveform {0.000 18.519} [get_ports clk_27mhz_i] (Source: C:/Users/Arturo/Documents/fpga/usw2000c01_test_ia/user_files/constrs/usw2000_timing.xdc (Line: 15))
+Previous: create_clock -period 37.037 -name clk_27mhz -waveform {0.000 18.519} [get_ports clk_27mhz_i] (Source: C:/Users/Arturo/Documents/fpga/usw2000c01_test_ia/user_files/constrs/usw2000_timing.xdc (Line: 13))
+Related violations: <none>
+
+REQP-1959#1 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c0_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_B.ddr_byte_lane_B/ddr_byte_group_io/input_[2].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#2 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c0_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_B.ddr_byte_lane_B/ddr_byte_group_io/input_[3].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#3 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c0_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_B.ddr_byte_lane_B/ddr_byte_group_io/input_[4].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#4 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c0_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_B.ddr_byte_lane_B/ddr_byte_group_io/input_[5].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#5 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c0_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_B.ddr_byte_lane_B/ddr_byte_group_io/input_[6].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#6 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c0_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_B.ddr_byte_lane_B/ddr_byte_group_io/input_[7].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#7 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c0_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_B.ddr_byte_lane_B/ddr_byte_group_io/input_[8].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#8 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c0_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_B.ddr_byte_lane_B/ddr_byte_group_io/input_[9].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#9 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c0_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_D.ddr_byte_lane_D/ddr_byte_group_io/input_[2].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#10 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c0_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_D.ddr_byte_lane_D/ddr_byte_group_io/input_[3].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#11 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c0_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_D.ddr_byte_lane_D/ddr_byte_group_io/input_[4].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#12 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c0_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_D.ddr_byte_lane_D/ddr_byte_group_io/input_[5].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#13 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c0_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_D.ddr_byte_lane_D/ddr_byte_group_io/input_[6].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#14 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c0_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_D.ddr_byte_lane_D/ddr_byte_group_io/input_[7].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#15 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c0_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_D.ddr_byte_lane_D/ddr_byte_group_io/input_[8].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#16 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c0_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_D.ddr_byte_lane_D/ddr_byte_group_io/input_[9].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#17 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c1_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_A.ddr_byte_lane_A/ddr_byte_group_io/input_[0].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#18 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c1_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_A.ddr_byte_lane_A/ddr_byte_group_io/input_[2].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#19 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c1_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_A.ddr_byte_lane_A/ddr_byte_group_io/input_[3].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#20 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c1_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_A.ddr_byte_lane_A/ddr_byte_group_io/input_[4].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#21 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c1_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_A.ddr_byte_lane_A/ddr_byte_group_io/input_[5].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#22 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c1_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_A.ddr_byte_lane_A/ddr_byte_group_io/input_[6].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#23 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c1_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_A.ddr_byte_lane_A/ddr_byte_group_io/input_[7].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#24 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c1_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_A.ddr_byte_lane_A/ddr_byte_group_io/input_[9].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#25 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c1_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_B.ddr_byte_lane_B/ddr_byte_group_io/input_[2].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#26 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c1_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_B.ddr_byte_lane_B/ddr_byte_group_io/input_[3].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#27 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c1_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_B.ddr_byte_lane_B/ddr_byte_group_io/input_[4].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#28 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c1_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_B.ddr_byte_lane_B/ddr_byte_group_io/input_[5].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#29 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c1_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_B.ddr_byte_lane_B/ddr_byte_group_io/input_[6].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#30 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c1_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_B.ddr_byte_lane_B/ddr_byte_group_io/input_[7].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#31 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c1_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_B.ddr_byte_lane_B/ddr_byte_group_io/input_[8].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#32 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c1_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_B.ddr_byte_lane_B/ddr_byte_group_io/input_[9].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#33 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c2_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_A.ddr_byte_lane_A/ddr_byte_group_io/input_[0].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#34 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c2_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_A.ddr_byte_lane_A/ddr_byte_group_io/input_[2].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#35 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c2_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_A.ddr_byte_lane_A/ddr_byte_group_io/input_[3].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#36 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c2_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_A.ddr_byte_lane_A/ddr_byte_group_io/input_[4].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#37 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c2_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_A.ddr_byte_lane_A/ddr_byte_group_io/input_[5].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#38 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c2_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_A.ddr_byte_lane_A/ddr_byte_group_io/input_[6].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#39 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c2_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_A.ddr_byte_lane_A/ddr_byte_group_io/input_[7].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#40 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c2_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_A.ddr_byte_lane_A/ddr_byte_group_io/input_[9].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#41 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c2_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_B.ddr_byte_lane_B/ddr_byte_group_io/input_[0].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#42 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c2_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_B.ddr_byte_lane_B/ddr_byte_group_io/input_[2].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#43 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c2_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_B.ddr_byte_lane_B/ddr_byte_group_io/input_[3].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#44 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c2_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_B.ddr_byte_lane_B/ddr_byte_group_io/input_[4].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#45 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c2_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_B.ddr_byte_lane_B/ddr_byte_group_io/input_[5].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#46 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c2_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_B.ddr_byte_lane_B/ddr_byte_group_io/input_[6].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#47 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c2_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_B.ddr_byte_lane_B/ddr_byte_group_io/input_[7].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#48 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c2_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_B.ddr_byte_lane_B/ddr_byte_group_io/input_[9].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#49 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c3_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_A.ddr_byte_lane_A/ddr_byte_group_io/input_[0].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#50 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c3_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_A.ddr_byte_lane_A/ddr_byte_group_io/input_[2].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#51 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c3_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_A.ddr_byte_lane_A/ddr_byte_group_io/input_[3].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#52 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c3_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_A.ddr_byte_lane_A/ddr_byte_group_io/input_[4].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#53 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c3_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_A.ddr_byte_lane_A/ddr_byte_group_io/input_[5].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#54 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c3_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_A.ddr_byte_lane_A/ddr_byte_group_io/input_[6].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#55 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c3_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_A.ddr_byte_lane_A/ddr_byte_group_io/input_[7].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#56 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c3_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_A.ddr_byte_lane_A/ddr_byte_group_io/input_[9].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#57 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c3_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_B.ddr_byte_lane_B/ddr_byte_group_io/input_[2].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#58 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c3_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_B.ddr_byte_lane_B/ddr_byte_group_io/input_[3].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#59 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c3_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_B.ddr_byte_lane_B/ddr_byte_group_io/input_[4].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#60 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c3_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_B.ddr_byte_lane_B/ddr_byte_group_io/input_[5].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#61 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c3_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_B.ddr_byte_lane_B/ddr_byte_group_io/input_[6].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#62 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c3_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_B.ddr_byte_lane_B/ddr_byte_group_io/input_[7].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#63 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c3_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_B.ddr_byte_lane_B/ddr_byte_group_io/input_[8].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+REQP-1959#64 Advisory
+connects_SERDES_RST_driver_not_FF  
+ctrl_ddr3_inst/u_ctrl_ddr_mig/c3_u_memc_ui_top_std/mem_intfc0/ddr_phy_top0/u_ddr_mc_phy_wrapper/u_ddr_mc_phy/ddr_phy_4lanes_0.u_ddr_phy_4lanes/ddr_byte_lane_B.ddr_byte_lane_B/ddr_byte_group_io/input_[9].iserdes_dq_.iserdesdq: The RST pin should only be driven by a Flip-flop.
+Related violations: <none>
+
+

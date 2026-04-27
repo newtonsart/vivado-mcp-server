@@ -206,7 +206,7 @@ proc ::vmcp::handlers::netlist::hierarchy {client_id req_id params} {
     }
 
     foreach c $all {
-        set name  [get_property NAME $c]
+        set name  $c
         set depth [llength [split $name "/"]]
         if {$depth > $max_depth} continue
         set ref ""

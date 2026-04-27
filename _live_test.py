@@ -142,7 +142,8 @@ async def main():
         skip("set_false_path", "same")
         skip("set_multicycle_path", "same")
         skip("set_clock_groups", "same")
-        await call(vv, "report_exceptions", {}, timeout=120)
+        p = os.path.join(tmpdir, "report_exceptions.txt").replace("\\", "/")
+        await call(vv, "report_exceptions", {"path": p}, timeout=300)
 
         print("\n== Hardware Manager ==")
         for cmd in ["connect_hw", "disconnect_hw", "get_hw_info", "program_device",

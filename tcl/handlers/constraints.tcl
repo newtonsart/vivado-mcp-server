@@ -329,7 +329,7 @@ proc ::vmcp::handlers::constraints::set_clock_groups {client_id req_id params} {
 # ------------------------------------------------------------------------------
 proc ::vmcp::handlers::constraints::report_exceptions {client_id req_id params} {
     if {![::vmcp::handlers::constraints::_require_design $client_id $req_id]} return
-    if {[catch {report_exceptions -return_string} report opts]} {
+    if {[catch {::report_exceptions -return_string} report opts]} {
         ::vmcp::protocol::send_error $client_id $req_id \
             "REPORT_FAILED" "report_exceptions failed: $report" \
             [dict get $opts -errorinfo]

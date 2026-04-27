@@ -97,7 +97,7 @@ def register(mcp, client_factory) -> None:
 
         Args:
             path: absolute output .xdc path.
-            constraints_only: if True, add -constraints ONLY (skip ports).
+            constraints_only: if True, include both valid and invalid constraints.
         """
         client = await client_factory()
         data = await client.send_command(

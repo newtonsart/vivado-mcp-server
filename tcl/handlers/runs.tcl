@@ -93,18 +93,19 @@ proc ::vmcp::handlers::runs::set_strategy {client_id req_id params} {
         ![string is true -strict [dict get $params reset]]} {
         set do_reset 0
     }
-    if {[catch {get_runs $run} err]} {
+    set run_obj [get_runs -quiet $run]
+    if {$run_obj eq ""} {
         ::vmcp::protocol::send_error $client_id $req_id \
             "RUN_NOT_FOUND" "Run '$run' does not exist"
         return
     }
     if {$do_reset} {
-        set status [get_property STATUS [get_runs $run]]
+        set status [get_property STATUS $run_obj]
         if {![string match -nocase "*Not started*" $status]} {
             catch {reset_run $run}
         }
     }
-    if {[catch {set_property strategy $strategy [get_runs $run]} err opts]} {
+    if {[catch {set_property strategy $strategy $run_obj} err opts]} {
         ::vmcp::protocol::send_error $client_id $req_id \
             "VIVADO_ERROR" "set_property strategy failed: $err" \
             [dict get $opts -errorinfo]
@@ -134,12 +135,12 @@ proc ::vmcp::handlers::runs::stats {client_id req_id params} {
         set v [dict get $params run]
         if {$v ne ""} { set run $v }
     }
-    if {[catch {get_runs $run} err]} {
+    set obj [get_runs -quiet $run]
+    if {$obj eq ""} {
         ::vmcp::protocol::send_error $client_id $req_id \
             "RUN_NOT_FOUND" "Run '$run' does not exist"
         return
     }
-    set obj [get_runs $run]
     set status   [get_property STATUS $obj]
     set strategy ""
     catch {set strategy [get_property STRATEGY $obj]}
@@ -196,7 +197,8 @@ proc ::vmcp::handlers::runs::wait {client_id req_id params} {
         set v [dict get $params timeout]
         if {[string is integer -strict $v] && $v > 0} { set to $v }
     }
-    if {[catch {get_runs $run} err]} {
+    set obj [get_runs -quiet $run]
+    if {$obj eq ""} {
         ::vmcp::protocol::send_error $client_id $req_id \
             "RUN_NOT_FOUND" "Run '$run' does not exist"
         return
@@ -207,7 +209,6 @@ proc ::vmcp::handlers::runs::wait {client_id req_id params} {
     if {[catch {wait_on_run -timeout $to_min $run} err]} {
         set ok 0
     }
-    set obj [get_runs $run]
     set status [get_property STATUS $obj]
     set wns ""; set tns ""
     catch {set wns [get_property STATS.WNS $obj]}

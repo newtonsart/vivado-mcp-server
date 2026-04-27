@@ -34,14 +34,15 @@ proc ::vmcp::handlers::impl::run {client_id req_id params} {
         if {[string is true -strict $v]} { set reset 1 }
     }
 
-    if {[catch {get_runs $run_name} err]} {
+    set run_obj [get_runs -quiet $run_name]
+    if {$run_obj eq ""} {
         ::vmcp::protocol::send_error $client_id $req_id \
-            "RUN_NOT_FOUND" "Run '$run_name' does not exist: $err"
+            "RUN_NOT_FOUND" "Run '$run_name' does not exist"
         return
     }
 
     if {[dict exists $params strategy]} {
-        catch {set_property strategy [dict get $params strategy] [get_runs $run_name]}
+        catch {set_property strategy [dict get $params strategy] $run_obj}
     }
 
     if {$reset} {
@@ -92,9 +93,10 @@ proc ::vmcp::handlers::impl::bitstream {client_id req_id params} {
         if {[string is true -strict $v]} { set reset 1 }
     }
 
-    if {[catch {get_runs $run_name} err]} {
+    set run_obj [get_runs -quiet $run_name]
+    if {$run_obj eq ""} {
         ::vmcp::protocol::send_error $client_id $req_id \
-            "RUN_NOT_FOUND" "Run '$run_name' does not exist: $err"
+            "RUN_NOT_FOUND" "Run '$run_name' does not exist"
         return
     }
 

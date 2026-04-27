@@ -48,16 +48,17 @@ proc ::vmcp::handlers::synthesis::run {client_id req_id params} {
     }
 
     # Validate that the run exists.
-    if {[catch {get_runs $run_name} run_obj]} {
+    set run_obj [get_runs -quiet $run_name]
+    if {$run_obj eq ""} {
         ::vmcp::protocol::send_error $client_id $req_id \
-            "RUN_NOT_FOUND" "Run '$run_name' does not exist: $run_obj"
+            "RUN_NOT_FOUND" "Run '$run_name' does not exist"
         return
     }
 
     # Optional strategy.
     if {[dict exists $params strategy]} {
         set strategy [dict get $params strategy]
-        catch {set_property strategy $strategy [get_runs $run_name]}
+        catch {set_property strategy $strategy $run_obj}
     }
 
     # Reset if requested.
@@ -168,14 +169,15 @@ proc ::vmcp::handlers::synthesis::_final_payload {run_name status pct outcome} {
 # ------------------------------------------------------------------------------
 proc ::vmcp::handlers::synthesis::status {client_id req_id params} {
     set run_name [expr {[dict exists $params run] ? [dict get $params run] : "synth_1"}]
-    if {[catch {get_runs $run_name} err]} {
+    set run_obj [get_runs -quiet $run_name]
+    if {$run_obj eq ""} {
         ::vmcp::protocol::send_error $client_id $req_id \
-            "RUN_NOT_FOUND" "Run '$run_name' does not exist: $err"
+            "RUN_NOT_FOUND" "Run '$run_name' does not exist"
         return
     }
-    set status [get_property STATUS [get_runs $run_name]]
+    set status [get_property STATUS $run_obj]
     set prog   0
-    catch { set prog [get_property PROGRESS [get_runs $run_name]] }
+    catch { set prog [get_property PROGRESS $run_obj] }
     set pct [::vmcp::runs::percent $prog]
 
     ::vmcp::protocol::send_result $client_id $req_id \

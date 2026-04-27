@@ -13,11 +13,11 @@
     "vivado_from_source": {
       "_comment": "Alternative: run directly from the cloned repo using uv (no install needed)",
       "command": "uv",
-      "args": ["run", "--project", "C:/path/to/vivado-mcp-server", "python", "-m", "server"],
+      "args": ["run", "--project", "C:/path/to/vivado-mcp-server", "python", "-m", "vivado_mcp_server"],
       "env": {
         "VMCP_HOST": "127.0.0.1",
         "VMCP_PORT": "7654"
       }
-    },
+    }
   }
 }

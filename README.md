@@ -113,6 +113,77 @@ Add to your `claude_desktop_config.json`. Two options:
 }
 ```
 
+### 4. Codex Desktop / Codex CLI (Windows)
+
+Recommended: use the installer. It sets up everything Codex needs:
+
+- creates/reuses `.venv`
+- installs `vivado-mcp-server` in editable mode
+- creates a stable wrapper at `%USERPROFILE%\.codex\memories\vivado-mcp.cmd`
+- registers the MCP server in `%USERPROFILE%\.codex\config.toml`
+
+From the `vivado-mcp-socket` repo root:
+
+```powershell
+.\install\install_codex_windows.ps1
+```
+
+Then restart Codex or open a new thread. Verify with:
+
+```powershell
+codex mcp list
+```
+
+Expected output:
+
+```text
+Name        Command                                         Args  Env                               Status
+vivado-mcp  C:\Users\<user>\.codex\memories\vivado-mcp.cmd  -     VMCP_HOST=*****, VMCP_PORT=*****  enabled
+```
+
+#### Manual Codex Configuration
+
+If you do not want to use the installer, add this to `%USERPROFILE%\.codex\config.toml`:
+
+```toml
+[mcp_servers.vivado-mcp]
+command = "C:\\Users\\<user>\\.codex\\memories\\vivado-mcp.cmd"
+args = []
+enabled = true
+
+[mcp_servers.vivado-mcp.env]
+VMCP_HOST = "127.0.0.1"
+VMCP_PORT = "7654"
+VMCP_LOGLEVEL = "INFO"
+```
+
+And create `%USERPROFILE%\.codex\memories\vivado-mcp.cmd`:
+
+```bat
+@echo off
+set VMCP_HOST=127.0.0.1
+set VMCP_PORT=7654
+set VMCP_LOGLEVEL=INFO
+cd /d "C:\path\to\vivado-mcp-socket"
+"C:\path\to\vivado-mcp-socket\.venv\Scripts\python.exe" -m vivado_mcp_server
+```
+
+Do not put the full `uv` command into a single argument. This is wrong:
+
+```toml
+command = "uv"
+args = ['"run --project C:/path/to/vivado-mcp-server python -m server"']
+```
+
+If you use `uv`, arguments must be split:
+
+```toml
+[mcp_servers.vivado-mcp]
+command = "uv"
+args = ["run", "--project", "C:/path/to/vivado-mcp-socket", "python", "-m", "vivado_mcp_server"]
+enabled = true
+```
+
 ## Usage
 
 1. Open Vivado (GUI or `vivado -mode tcl`). The TCL console should show:

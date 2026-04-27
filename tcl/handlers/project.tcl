@@ -200,10 +200,10 @@ proc ::vmcp::handlers::project::write_xdc {client_id req_id params} {
         return
     }
     set path [dict get $params path]
-    set cmd [list write_xdc -force]
+    set cmd [list ::write_xdc -force]
     if {[dict exists $params constraints_only] && \
         [string is true -strict [dict get $params constraints_only]]} {
-        lappend cmd -constraints ONLY
+        lappend cmd -constraints all
     }
     lappend cmd $path
     if {[catch {eval $cmd} err opts]} {

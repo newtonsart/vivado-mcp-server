@@ -97,7 +97,7 @@ COMMAND_TIMEOUTS: Dict[str, float] = {
     "set_false_path":       30.0,
     "set_multicycle_path":  30.0,
     "set_clock_groups":     30.0,
-    "report_exceptions":   120.0,
+    "report_exceptions":   300.0,
     "list_strategies":      30.0,
     "set_run_strategy":     60.0,
     "get_run_stats":        30.0,
